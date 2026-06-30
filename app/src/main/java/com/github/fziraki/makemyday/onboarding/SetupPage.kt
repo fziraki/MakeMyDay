@@ -51,6 +51,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SetupPage(
+    onNavigateToLocationSearch: () -> Unit,
     viewModel: SetupPageViewModel = koinViewModel(),
 ) {
 
@@ -59,6 +60,7 @@ fun SetupPage(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
+        viewModel.onAction(SetupAction.OnInit)
         val isGranted: Boolean =
             ContextCompat.checkSelfPermission(
                 context,
@@ -102,9 +104,9 @@ fun SetupPage(
         SetupRow(
             icon = Icons.Outlined.Cloud,
             title = "Weather",
-            subtitle = "Set your city",
-            isGranted = false,
-            onClick = { /* navigate to location page */ }
+            subtitle = state.selectedCity.ifEmpty { "Set your city" },
+            isGranted = state.selectedCity.isNotBlank(),
+            onClick = onNavigateToLocationSearch
         )
 
         // Calendar — tappable, requests permission

@@ -39,9 +39,9 @@ sealed interface OnboardingPage {
 }
 @Composable
 fun OnboardingScreen(
-    onFinish: () -> Unit
+    onFinish: () -> Unit,
+    onNavigateToLocationSearch: () -> Unit
 ) {
-
 
     val pages = remember {
         listOf(
@@ -93,7 +93,9 @@ fun OnboardingScreen(
                 }
 
                 is OnboardingPage.Setup -> {
-                    SetupPage()
+                    SetupPage(
+                        onNavigateToLocationSearch = onNavigateToLocationSearch
+                    )
                 }
             }
         }

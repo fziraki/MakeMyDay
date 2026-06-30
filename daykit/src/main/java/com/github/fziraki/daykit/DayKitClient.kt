@@ -1,29 +1,34 @@
 package com.github.fziraki.daykit
 
 import android.content.Context
+import com.github.fziraki.daykit.di.ServiceLocator
 import com.github.fziraki.daykit.internal.calendar.AndroidCalendarProvider
 import com.github.fziraki.daykit.internal.music.StubMusicProvider
 import com.github.fziraki.daykit.internal.todo.StubTodoProvider
-import com.github.fziraki.daykit.internal.weather.StubWeatherProvider
+import com.github.fziraki.daykit.model.LocationResult
 import com.github.fziraki.daykit.model.MyDaySummary
-import com.github.fziraki.daykit.providers.CalendarResult
 import com.github.fziraki.daykit.providers.CalendarProvider
+import com.github.fziraki.daykit.providers.CalendarResult
 import com.github.fziraki.daykit.providers.MusicProvider
 import com.github.fziraki.daykit.providers.TodoProvider
 import com.github.fziraki.daykit.providers.WeatherProvider
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlin.coroutines.cancellation.CancellationException
 
 class DayKitClient private constructor(
     private val calendar: CalendarProvider,
     private val weather: WeatherProvider,
     private val todos: TodoProvider,
-    private val music: MusicProvider,
-    private val homeLat: Double,
-    private val homeLon: Double
+    private val music: MusicProvider
 ) {
 
-    suspend fun getMyDay(): MyDaySummary = coroutineScope {
+    suspend fun searchCity(query: String): List<LocationResult>{
+        return ServiceLocator.locationDataSource.search(query)
+    }
+
+    suspend fun getMyDay(lat: Double? = null, lon: Double? = null, city: String? = null): MyDaySummary = coroutineScope {
+
 
         val eventsDeferred = async {
             runCatching { calendar.getTodayEvents() }
@@ -31,9 +36,13 @@ class DayKitClient private constructor(
         }
 
         val weatherDeferred = async {
-            runCatching { weather.getCurrentWeather(homeLat, homeLon) }
-                .onFailure { if (it is kotlinx.coroutines.CancellationException) throw it }
-                .getOrNull()
+            if (lat != null && lon != null && city != null){
+                runCatching { weather.getCurrentWeather(lat = lat, lon = lon, city = city) }
+                    .onFailure { if (it is CancellationException) throw it }
+                    .getOrNull()
+            }else{
+                null
+            }
         }
 
         val tasksDeferred = async {
@@ -69,25 +78,13 @@ class DayKitClient private constructor(
 
     class Builder(private val context: Context) {
 
-        private var latitude: Double? = null
-        private var longitude: Double? = null
-
-        fun setLocation(latitude: Double, longitude: Double) = apply {
-            this.latitude = latitude
-            this.longitude = longitude
-        }
-
         fun build(): DayKitClient {
-            val lat = requireNotNull(latitude) { "Location must be set before building DayKitClient." }
-            val lon = requireNotNull(longitude) { "Location must be set before building DayKitClient." }
 
             return DayKitClient(
                 calendar = AndroidCalendarProvider(context),
-                weather = StubWeatherProvider(),
+                weather = ServiceLocator.weatherProvider,
                 todos = StubTodoProvider(),
-                music = StubMusicProvider(),
-                homeLat = lat,
-                homeLon = lon
+                music = StubMusicProvider()
             )
         }
     }

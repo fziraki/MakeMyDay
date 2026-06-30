@@ -2,6 +2,7 @@ package com.github.fziraki.makemyday.di
 
 import com.github.fziraki.daykit.DayKitClient
 import com.github.fziraki.makemyday.AppPreferences
+import com.github.fziraki.makemyday.locationsearch.LocationSearchViewModel
 import com.github.fziraki.makemyday.myday.MyDayViewModel
 import com.github.fziraki.makemyday.onboarding.SetupPageViewModel
 import org.koin.android.ext.koin.androidContext
@@ -13,10 +14,9 @@ val appModule = module {
     single {
         AppPreferences(get())
     }
+
     single {
-        DayKitClient.Builder(androidContext())
-            .setLocation(52.5, 5.47)
-            .build()
+        DayKitClient.Builder(androidContext()).build()
     }
 
     viewModel {
@@ -31,4 +31,13 @@ val appModule = module {
             preferences = get()
         )
     }
+
+    viewModel {
+        LocationSearchViewModel(
+            client = get(),
+            preferences = get(),
+        )
+    }
+
+
 }

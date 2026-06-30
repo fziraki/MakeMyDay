@@ -8,6 +8,7 @@ import com.github.fziraki.daykit.providers.CalendarResult
 import com.github.fziraki.makemyday.AppPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -19,14 +20,21 @@ class MyDayViewModel(
     private val _state = MutableStateFlow(MyDayState())
     val state = _state.asStateFlow()
 
-    init {
-        loadDay()
-    }
-
     val isCalendarAsked = preferences.wasAsked(
         Manifest.permission.READ_CALENDAR
     )
 
+    init {
+        viewModelScope.launch {
+            preferences.savedLocation.collect { location ->
+                if (location != null) {
+                    loadDay()
+                } else {
+                    _state.update { it.copy(isLoading = false, locationNotSet = true) }
+                }
+            }
+        }
+    }
     fun markCalendarAsked() {
         viewModelScope.launch {
             preferences.markAsked(
@@ -44,7 +52,14 @@ class MyDayViewModel(
 
     private fun loadDay() {
         viewModelScope.launch {
-            val summary = client.getMyDay()
+
+            val savedLocation = preferences.savedLocation.first()
+
+            val summary = client.getMyDay(
+                lat = savedLocation?.lat,
+                lon = savedLocation?.lon,
+                city = savedLocation?.city
+            )
 
             val (events, permissionDenied, error) = when (val result = summary.calendarResult) {
                 is CalendarResult.Success -> Triple(result.events, false, false)
@@ -55,6 +70,7 @@ class MyDayViewModel(
             _state.update {
                 it.copy(
                     isLoading = false,
+                    locationNotSet = savedLocation == null,
                     weather = summary.weather,
                     events = events,
                     calendarPermissionDenied = permissionDenied,

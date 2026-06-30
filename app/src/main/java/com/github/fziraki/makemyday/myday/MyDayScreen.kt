@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -63,6 +65,7 @@ import java.time.ZoneId
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyDayScreen(
+    onNavigateToLocationSearch: () -> Unit,
     viewModel: MyDayViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -123,7 +126,13 @@ fun MyDayScreen(
         ) {
             item { Spacer(Modifier.height(4.dp)) }
 
-            item { WeatherCard(state.weather) }
+            if (state.locationNotSet) {
+                item {
+                    WeatherNotSetCard(onTap = onNavigateToLocationSearch)
+                }
+            } else {
+                item { WeatherCard(state.weather) }
+            }
 
             item {
                 SectionLabel("Today's events")
@@ -298,6 +307,43 @@ fun WeatherCard(weather: WeatherInfo?) {
         }
     }
 }
+
+@Composable
+fun WeatherNotSetCard(onTap: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onTap() },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Cloud,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+            Column {
+                Text(
+                    text = "Weather not set up",
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "Tap to set your city",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun EventRow(event: CalendarEvent) {

@@ -7,6 +7,7 @@ import com.github.fziraki.daykit.model.TodoItem
 
 data class MyDayState(
     val isLoading: Boolean = true,
+    val locationNotSet: Boolean = false,
     val weather: WeatherInfo? = null,
     val events: List<CalendarEvent> = emptyList(),
     val calendarPermissionDenied: Boolean = false,
@@ -18,5 +19,4 @@ data class MyDayState(
 sealed interface MyDayAction {
     data class CompleteTask(val id: String) : MyDayAction
     data object RetryCalendar : MyDayAction
-
 }
