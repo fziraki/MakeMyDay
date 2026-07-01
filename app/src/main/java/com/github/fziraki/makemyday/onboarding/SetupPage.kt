@@ -19,14 +19,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.CalendarToday
-import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -39,12 +42,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
+
 
 @Composable
 fun SetupPage(
@@ -143,20 +149,15 @@ fun SetupPage(
             }
         )
 
-        // Tasks — tappable, future
-        SetupRow(
-            icon = Icons.Outlined.CheckBox,
-            title = "Tasks",
-            subtitle = "Connect a todo app",
-            isGranted = false,
-            onClick = { /* future */ }
-        )
-
         // Music — inline input
         SetupMusicRow(
             artistInput = state.artistInput,
             onArtistChange = {
                 viewModel.onAction(SetupAction.ArtistChanged(it))
+            },
+            isGranted = !state.artistInput.isNullOrEmpty(),
+            onDone = {
+                viewModel.onAction(SetupAction.OnDone)
             }
         )
     }
@@ -241,16 +242,32 @@ private fun SetupRow(
 @Composable
 private fun SetupMusicRow(
     artistInput: String?,
-    onArtistChange: (String) -> Unit
+    onArtistChange: (String) -> Unit,
+    isGranted: Boolean,
+    onDone: () -> Unit
 ) {
+
+    val containerColor = if (isGranted)
+        MaterialTheme.colorScheme.primaryContainer
+    else
+        MaterialTheme.colorScheme.surfaceVariant
+
+    val borderColor = if (isGranted)
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+    else
+        MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+
+
+    val focusManager = LocalFocusManager.current
+
     Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = containerColor,
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier
             .fillMaxWidth()
             .border(
                 width = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                color = borderColor,
                 shape = MaterialTheme.shapes.medium
             )
     ) {
@@ -266,7 +283,10 @@ private fun SetupMusicRow(
                 Icon(
                     imageVector = Icons.Outlined.MusicNote,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (isGranted)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(8.dp)
                 )
             }
@@ -294,7 +314,35 @@ private fun SetupMusicRow(
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.small
+                    shape = MaterialTheme.shapes.small,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                            onDone()
+                        }
+                    ),
+                    trailingIcon = {
+                        if (!artistInput.isNullOrBlank()) {
+                            IconButton(
+                                onClick = {
+                                    focusManager.clearFocus()
+                                    onDone()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Done",
+                                    tint = if (isGranted)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(

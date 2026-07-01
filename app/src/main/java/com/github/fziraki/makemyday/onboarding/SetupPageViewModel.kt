@@ -44,10 +44,15 @@ class SetupPageViewModel(
     fun onAction(action: SetupAction) {
         when (action) {
             is SetupAction.ArtistChanged -> {
-                viewModelScope.launch {
-                    preferences.saveFavoriteArtist(action.value)
-                }
                 _state.update { it.copy(artistInput = action.value) }
+            }
+
+            SetupAction.OnDone -> {
+                viewModelScope.launch {
+                    _state.value.artistInput?.let {
+                        preferences.saveFavoriteArtist(it)
+                    }
+                }
             }
 
             is SetupAction.SetCalendarGranted -> {

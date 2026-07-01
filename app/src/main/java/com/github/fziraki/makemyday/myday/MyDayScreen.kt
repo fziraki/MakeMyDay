@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import android.util.Log
-import android.widget.Space
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -25,8 +24,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Pause
@@ -47,28 +46,22 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.fziraki.daykit.model.CalendarEvent
-import com.github.fziraki.daykit.model.TodoItem
 import com.github.fziraki.daykit.model.Track
 import com.github.fziraki.daykit.model.WeatherInfo
-import com.github.fziraki.makemyday.AppPreferences
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -232,36 +225,13 @@ fun MyDayScreen(
                 }
             }
 
-            state.tasks?.let { tasks ->
-                item {
-                    val remaining = tasks.count { !it.isCompleted }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        SectionLabel("Tasks")
-                        Text(
-                            text = "$remaining left",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                items(tasks) { task ->
-                    TaskRow(
-                        task = task,
-                        onToggle = {
-                            viewModel.onAction(MyDayAction.CompleteTask(task.id))
-                        }
-                    )
-                }
-            }
-
             item {
                 SetupMusicRow(
                     artistInput = state.inputArtist,
                     onArtistChange = { viewModel.onAction(MyDayAction.OnArtistChange(it)) },
+                    onDone = {
+                        viewModel.onAction(MyDayAction.OnDone)
+                    },
                     onGetTrackClicked = {
                         viewModel.onAction(MyDayAction.OnGetTrackClick)
                     }
@@ -301,8 +271,12 @@ fun MyDayScreen(
 private fun SetupMusicRow(
     artistInput: String?,
     onArtistChange: (String) -> Unit,
+    onDone: () -> Unit,
     onGetTrackClicked: () -> Unit
 ) {
+
+    val focusManager = LocalFocusManager.current
+
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
         shape = MaterialTheme.shapes.medium,
@@ -354,7 +328,32 @@ private fun SetupMusicRow(
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.small
+                    shape = MaterialTheme.shapes.small,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                            onDone()
+                        }
+                    ),
+                    trailingIcon = {
+                        if (!artistInput.isNullOrBlank()) {
+                            IconButton(
+                                onClick = {
+                                    focusManager.clearFocus()
+                                    onDone()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Done",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
@@ -497,52 +496,6 @@ fun EventRow(event: CalendarEvent) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-    }
-}
-
-@Composable
-fun TaskRow(task: TodoItem, onToggle: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .clickable { onToggle() }
-            .padding(vertical = 8.dp, horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        val accent = MaterialTheme.colorScheme.primary
-        Box(
-            modifier = Modifier
-                .size(20.dp)
-                .background(
-                    color = if (task.isCompleted) accent else Color.Transparent,
-                    shape = MaterialTheme.shapes.extraSmall
-                )
-                .then(
-                    if (!task.isCompleted) Modifier.border(
-                        width = 1.5.dp,
-                        color = MaterialTheme.colorScheme.outline,
-                        shape = MaterialTheme.shapes.extraSmall
-                    ) else Modifier
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (task.isCompleted) {
-                Icon(
-                    Icons.Filled.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
-        }
-        Text(
-            text = task.title,
-            color = if (task.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant
-            else MaterialTheme.colorScheme.onSurface,
-            textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
-        )
     }
 }
 

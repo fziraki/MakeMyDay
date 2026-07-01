@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarToday
-import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.WbSunny
@@ -78,10 +77,6 @@ fun WelcomePage() {
             WelcomeFeatureRow(
                 icon = Icons.Outlined.CalendarToday,
                 label = "Today's events from your calendar"
-            )
-            WelcomeFeatureRow(
-                icon = Icons.Outlined.CheckBox,
-                label = "Pending tasks from your todo app"
             )
             WelcomeFeatureRow(
                 icon = Icons.Outlined.MusicNote,

@@ -4,15 +4,12 @@ import android.content.Context
 import com.github.fziraki.daykit.di.ServiceLocator
 import com.github.fziraki.daykit.di.ServiceLocator.locationDataSource
 import com.github.fziraki.daykit.internal.calendar.AndroidCalendarProvider
-import com.github.fziraki.daykit.internal.todo.StubTodoProvider
 import com.github.fziraki.daykit.model.LocationResult
 import com.github.fziraki.daykit.model.MyDaySummary
-import com.github.fziraki.daykit.model.TodoItem
 import com.github.fziraki.daykit.model.WeatherInfo
 import com.github.fziraki.daykit.providers.CalendarProvider
 import com.github.fziraki.daykit.providers.CalendarResult
 import com.github.fziraki.daykit.providers.MusicProvider
-import com.github.fziraki.daykit.providers.TodoProvider
 import com.github.fziraki.daykit.providers.WeatherProvider
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -20,7 +17,6 @@ import kotlinx.coroutines.coroutineScope
 class DayKitClient private constructor(
     private val weather: WeatherProvider,
     private val calendar: CalendarProvider,
-    private val todos: TodoProvider,
     private val music: MusicProvider,
 ) {
 
@@ -40,8 +36,6 @@ class DayKitClient private constructor(
 
         val events = async { getTodayEvents() }
 
-        val tasks = async { getPendingTasks() }
-
         val track = async {
             artist?.let { getRecommendedTrack(it) }
         }
@@ -49,7 +43,6 @@ class DayKitClient private constructor(
         MyDaySummary(
             calendarResult = events.await(),
             weather = weather.await(),
-            tasks = tasks.await(),
             recommendedTrack = track.await()
         )
     }
@@ -70,19 +63,6 @@ class DayKitClient private constructor(
         runCatching { calendar.getTodayEvents() }
             .getOrDefault(CalendarResult.Error)
 
-    // ===== tasks =====
-    suspend fun getPendingTasks(): List<TodoItem>? {
-        if (!todos.isAuthenticated()) return null
-        return runCatching { todos.getPendingTasks() }
-            .getOrNull()
-    }
-
-    suspend fun completeTask(id: String): Boolean {
-        if (!todos.isAuthenticated()) return false
-        return runCatching { todos.completeTask(id) }
-            .getOrDefault(false)
-    }
-
     // ===== Music =====
     suspend fun getRecommendedTrack(artist: String) =
         runCatching { music.getRecommendedTrack(artist) }
@@ -94,7 +74,6 @@ class DayKitClient private constructor(
 
         private var weather: WeatherProvider? = null
         private var calendar: CalendarProvider? = null
-        private var todos: TodoProvider? = null
         private var music: MusicProvider? = null
 
         fun weather(provider: WeatherProvider) = apply {
@@ -105,10 +84,6 @@ class DayKitClient private constructor(
             calendar = provider
         }
 
-        fun todos(provider: TodoProvider) = apply {
-            todos = provider
-        }
-
         fun music(provider: MusicProvider) = apply {
             music = provider
         }
@@ -117,7 +92,6 @@ class DayKitClient private constructor(
             return DayKitClient(
                 calendar = calendar ?: AndroidCalendarProvider(context),
                 weather = weather ?: ServiceLocator.weatherProvider,
-                todos = todos ?: StubTodoProvider(),
                 music = music ?: ServiceLocator.musicProvider,
             )
         }

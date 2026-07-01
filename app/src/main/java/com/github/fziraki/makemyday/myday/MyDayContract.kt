@@ -3,7 +3,6 @@ package com.github.fziraki.makemyday.myday
 import com.github.fziraki.daykit.model.CalendarEvent
 import com.github.fziraki.daykit.model.Track
 import com.github.fziraki.daykit.model.WeatherInfo
-import com.github.fziraki.daykit.model.TodoItem
 
 data class MyDayState(
     val isLoading: Boolean = true,
@@ -12,7 +11,6 @@ data class MyDayState(
     val events: List<CalendarEvent> = emptyList(),
     val calendarPermissionDenied: Boolean = false,
     val calendarError: Boolean = false,
-    val tasks: List<TodoItem>? = null,
     val inputArtist: String? = null,
     val musicUiState: MusicUiState = MusicUiState.Idle
 )
@@ -27,10 +25,11 @@ sealed interface MusicUiState {
 enum class ErrorAction { RETRY, EDIT_ARTIST }
 
 sealed interface MyDayAction {
-    data class CompleteTask(val id: String) : MyDayAction
     data object RetryCalendar : MyDayAction
 
     data object OnGetTrackClick: MyDayAction
+
+    data object OnDone: MyDayAction
 
     data class OnArtistChange(val value: String): MyDayAction
 

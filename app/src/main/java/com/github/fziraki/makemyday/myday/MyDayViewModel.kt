@@ -63,8 +63,16 @@ class MyDayViewModel(
 
     fun onAction(action: MyDayAction) {
         when (action) {
-            is MyDayAction.CompleteTask -> completeTask(action.id)
             MyDayAction.RetryCalendar -> loadDay()
+
+            MyDayAction.OnDone -> {
+                _state.value.inputArtist?.let { artist ->
+                    viewModelScope.launch {
+                        preferences.saveFavoriteArtist(artist)
+                    }
+                }
+            }
+
             is MyDayAction.OnArtistChange -> {
                 _state.update { it.copy(inputArtist = action.value) }
             }
@@ -121,23 +129,10 @@ class MyDayViewModel(
                     events = events,
                     calendarPermissionDenied = permissionDenied,
                     calendarError = error,
-                    tasks = summary.tasks,
                     musicUiState = summary.recommendedTrack?.toMusicUiState() ?: MusicUiState.Idle
                 )
             }
         }
     }
 
-    private fun completeTask(id: String) {
-        viewModelScope.launch {
-            val success = client.completeTask(id)
-            if (success) {
-                _state.update { state ->
-                    state.copy(
-                        tasks = state.tasks?.filter { it.id != id }
-                    )
-                }
-            }
-        }
-    }
 }
