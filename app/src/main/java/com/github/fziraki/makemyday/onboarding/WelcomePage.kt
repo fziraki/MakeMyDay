@@ -57,7 +57,7 @@ fun WelcomePage() {
         Spacer(Modifier.height(8.dp))
 
         Text(
-            text = "Your day, at a glance — weather, calendar,\n tasks and music in one place.",
+            text = "Your day, at a glance — weather, calendar\nand music in one place.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
