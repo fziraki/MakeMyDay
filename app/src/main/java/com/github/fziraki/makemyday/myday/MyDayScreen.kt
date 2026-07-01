@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
+import android.widget.Space
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -24,17 +26,24 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.MusicNote
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -57,10 +66,14 @@ import com.github.fziraki.daykit.model.TodoItem
 import com.github.fziraki.daykit.model.Track
 import com.github.fziraki.daykit.model.WeatherInfo
 import com.github.fziraki.makemyday.AppPreferences
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +82,10 @@ fun MyDayScreen(
     viewModel: MyDayViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
+
+    Log.d("tagg","isPlaying $isPlaying")
 
     val context = LocalContext.current
 
@@ -126,12 +143,13 @@ fun MyDayScreen(
         ) {
             item { Spacer(Modifier.height(4.dp)) }
 
-            if (state.locationNotSet) {
-                item {
+
+            item {
+                if (state.locationNotSet) {
                     WeatherNotSetCard(onTap = onNavigateToLocationSearch)
+                }else {
+                    WeatherCard(state.weather)
                 }
-            } else {
-                item { WeatherCard(state.weather) }
             }
 
             item {
@@ -240,10 +258,36 @@ fun MyDayScreen(
                 }
             }
 
-            state.recommendedTrack?.let { track ->
-                item {
-                    SectionLabel("Discover")
-                    DiscoverCard(track)
+            item {
+                SetupMusicRow(
+                    artistInput = state.inputArtist,
+                    onArtistChange = { viewModel.onAction(MyDayAction.OnArtistChange(it)) },
+                    onGetTrackClicked = {
+                        viewModel.onAction(MyDayAction.OnGetTrackClick)
+                    }
+                )
+            }
+
+            when(val result = state.musicUiState){
+                is MusicUiState.Error -> {
+
+                }
+                MusicUiState.Idle -> {
+
+                }
+                MusicUiState.Loading -> {
+
+                }
+                is MusicUiState.Success -> {
+                    item {
+                        DiscoverCard(
+                            track = result.track,
+                            isPlaying = isPlaying,
+                            onPlayPause = {
+                                viewModel.onAction(MyDayAction.OnPlayPause(it))
+                            },
+                        )
+                    }
                 }
             }
 
@@ -253,14 +297,99 @@ fun MyDayScreen(
 }
 
 
+@Composable
+private fun SetupMusicRow(
+    artistInput: String?,
+    onArtistChange: (String) -> Unit,
+    onGetTrackClicked: () -> Unit
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 0.5.dp,
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                shape = MaterialTheme.shapes.medium
+            )
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.MusicNote,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Music",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "An artist you love",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(6.dp))
+                OutlinedTextField(
+                    value = artistInput?:"",
+                    onValueChange = onArtistChange,
+                    placeholder = {
+                        Text(
+                            "e.g. Arctic Monkeys",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    },
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.small
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "We'll suggest music in a similar style.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        onGetTrackClicked()
+                    },
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp)
+                ) {
+                    Text(
+                        text = "Get Recommendation"
+                    )
+                }
+            }
+        }
+    }
+}
+
 private fun todayLabel(): String {
-    val today = java.time.LocalDate.now()
-    val formatter = java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM")
+    val today = LocalDate.now()
+    val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM")
     return today.format(formatter)
 }
 
 private fun greeting(): String {
-    val hour = java.time.LocalTime.now().hour
+    val hour = LocalTime.now().hour
     return when {
         hour < 12 -> "Good morning"
         hour < 18 -> "Good afternoon"
@@ -276,6 +405,7 @@ fun SectionLabel(text: String) {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(bottom = 4.dp)
     )
+    Spacer(modifier = Modifier.height(4.dp))
 }
 
 @Composable
@@ -417,7 +547,12 @@ fun TaskRow(task: TodoItem, onToggle: () -> Unit) {
 }
 
 @Composable
-fun DiscoverCard(track: Track) {
+fun DiscoverCard(
+    track: Track,
+    isPlaying: Boolean,
+    onPlayPause: (String) -> Unit
+) {
+    SectionLabel("Listen to the preview:")
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -438,11 +573,21 @@ fun DiscoverCard(track: Track) {
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Filled.PlayArrow,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
+
+                IconButton(
+                    onClick = {
+                        onPlayPause(track.source)
+                    }
+                ) {
+                    Icon(
+                        imageVector = if (isPlaying)
+                            Icons.Default.Pause
+                        else
+                            Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(track.title, fontWeight = FontWeight.Medium)

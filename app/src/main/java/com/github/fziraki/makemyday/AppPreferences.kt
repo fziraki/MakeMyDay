@@ -26,6 +26,9 @@ class AppPreferences(
         private val SAVED_LOCATION =
             stringPreferencesKey("saved_location")
 
+        private val FAVORITE_ARTIST =
+            stringPreferencesKey("favorite_artist")
+
         private val json = Json {
             ignoreUnknownKeys = true
         }
@@ -37,7 +40,7 @@ class AppPreferences(
 
     val onboardingCompleted: Flow<Boolean> =
         dataStore.data.map {
-            it[ONBOARDING_COMPLETED] ?: false
+            it[ONBOARDING_COMPLETED]?:false
         }
 
     suspend fun completeOnboarding() {
@@ -74,5 +77,16 @@ class AppPreferences(
                     json.decodeFromString<LocationResult>(it)
                 }.getOrNull()
             }
+        }
+
+    suspend fun saveFavoriteArtist(artist: String) {
+        dataStore.edit {
+            it[FAVORITE_ARTIST] = artist
+        }
+    }
+
+    val savedFavoriteArtist: Flow<String?> =
+        dataStore.data.map { preferences ->
+            preferences[FAVORITE_ARTIST]
         }
 }

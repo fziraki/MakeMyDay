@@ -13,10 +13,27 @@ data class MyDayState(
     val calendarPermissionDenied: Boolean = false,
     val calendarError: Boolean = false,
     val tasks: List<TodoItem>? = null,
-    val recommendedTrack: Track? = null
+    val inputArtist: String? = null,
+    val musicUiState: MusicUiState = MusicUiState.Idle
 )
+
+sealed interface MusicUiState {
+    data object Idle : MusicUiState
+    data object Loading : MusicUiState
+    data class Success(val track: Track) : MusicUiState
+    data class Error(val message: String, val action: ErrorAction) : MusicUiState
+}
+
+enum class ErrorAction { RETRY, EDIT_ARTIST }
 
 sealed interface MyDayAction {
     data class CompleteTask(val id: String) : MyDayAction
     data object RetryCalendar : MyDayAction
+
+    data object OnGetTrackClick: MyDayAction
+
+    data class OnArtistChange(val value: String): MyDayAction
+
+    data class OnPlayPause(val value: String): MyDayAction
+
 }

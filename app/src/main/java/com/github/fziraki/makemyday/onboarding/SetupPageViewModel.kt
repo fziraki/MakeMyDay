@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.github.fziraki.makemyday.AppPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -35,11 +34,19 @@ class SetupPageViewModel(
                 _state.update { it.copy(selectedCity = location?.city?:"") }
             }
         }
+        viewModelScope.launch {
+            preferences.savedFavoriteArtist.collect { artist ->
+                _state.update { it.copy(artistInput = artist) }
+            }
+        }
     }
 
     fun onAction(action: SetupAction) {
         when (action) {
             is SetupAction.ArtistChanged -> {
+                viewModelScope.launch {
+                    preferences.saveFavoriteArtist(action.value)
+                }
                 _state.update { it.copy(artistInput = action.value) }
             }
 
@@ -47,12 +54,6 @@ class SetupPageViewModel(
                 _state.update { it.copy(isCalendarGranted = action.value) }
             }
 
-            SetupAction.OnInit -> {
-                viewModelScope.launch {
-                    val savedLocation = preferences.savedLocation.first()
-                    _state.update { it.copy(selectedCity = savedLocation?.city?:"") }
-                }
-            }
         }
     }
 

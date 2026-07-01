@@ -35,9 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,7 +57,6 @@ fun SetupPage(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        viewModel.onAction(SetupAction.OnInit)
         val isGranted: Boolean =
             ContextCompat.checkSelfPermission(
                 context,
@@ -80,8 +76,6 @@ fun SetupPage(
             viewModel.onAction(SetupAction.SetCalendarGranted(value = true))
         }
     }
-
-    var artistInput by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -160,8 +154,10 @@ fun SetupPage(
 
         // Music — inline input
         SetupMusicRow(
-            artistInput = artistInput,
-            onArtistChange = { artistInput = it }
+            artistInput = state.artistInput,
+            onArtistChange = {
+                viewModel.onAction(SetupAction.ArtistChanged(it))
+            }
         )
     }
 }
@@ -244,7 +240,7 @@ private fun SetupRow(
 
 @Composable
 private fun SetupMusicRow(
-    artistInput: String,
+    artistInput: String?,
     onArtistChange: (String) -> Unit
 ) {
     Surface(
@@ -287,7 +283,7 @@ private fun SetupMusicRow(
                 )
                 Spacer(Modifier.height(6.dp))
                 OutlinedTextField(
-                    value = artistInput,
+                    value = artistInput?:"",
                     onValueChange = onArtistChange,
                     placeholder = {
                         Text(

@@ -3,6 +3,8 @@ package com.github.fziraki.makemyday.di
 import com.github.fziraki.daykit.DayKitClient
 import com.github.fziraki.makemyday.AppPreferences
 import com.github.fziraki.makemyday.locationsearch.LocationSearchViewModel
+import com.github.fziraki.makemyday.myday.AudioPlayer
+import com.github.fziraki.makemyday.myday.ExoAudioPlayer
 import com.github.fziraki.makemyday.myday.MyDayViewModel
 import com.github.fziraki.makemyday.onboarding.SetupPageViewModel
 import org.koin.android.ext.koin.androidContext
@@ -19,10 +21,15 @@ val appModule = module {
         DayKitClient.Builder(androidContext()).build()
     }
 
+    single<AudioPlayer> {
+        ExoAudioPlayer(androidContext())
+    }
+
     viewModel {
         MyDayViewModel(
             client = get(),
-            preferences = get()
+            preferences = get(),
+            audioPlayer = get()
         )
     }
 
