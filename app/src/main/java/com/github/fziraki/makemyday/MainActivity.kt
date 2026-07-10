@@ -3,6 +3,7 @@ package com.github.fziraki.makemyday
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity() {
             onboardingCompleted.value == null
         }
 
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
 

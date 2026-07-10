@@ -4,10 +4,6 @@
     <style name="Theme.MakeMyDay" parent="android:Theme.Material.Light.NoActionBar" />
 
     <style name="Theme.MakeMyDay.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#7E8FC2</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/outline_wb_sunny_24</item>
-        <item name="android:windowSplashScreenBehavior" tools:targetApi="33">icon_preferred</item>
-        <item name="windowSplashScreenAnimationDuration">500</item>
         <item name="postSplashScreenTheme">@style/Theme.MakeMyDay</item>
     </style>
 

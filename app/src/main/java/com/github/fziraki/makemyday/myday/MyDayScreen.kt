@@ -9,6 +9,7 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,8 +30,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.EditLocationAlt
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Cloud
@@ -58,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -67,6 +67,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.fziraki.daykit.model.CalendarEvent
 import com.github.fziraki.daykit.model.Track
 import com.github.fziraki.daykit.model.WeatherInfo
+import com.github.fziraki.makemyday.R
 import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
 import java.time.LocalDate
@@ -102,6 +103,19 @@ fun MyDayScreen(
             TopAppBar(
                 title = {
                     Column {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Image(
+                            modifier = Modifier.height(36.dp),
+                            painter = painterResource(R.drawable.sun),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Image(
+                            modifier = Modifier.height(20.dp),
+                            painter = painterResource(R.drawable.name),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = todayLabel(),
                             style = MaterialTheme.typography.bodySmall,
@@ -420,7 +434,8 @@ private fun greeting(): String {
     return when {
         hour < 12 -> "Good morning"
         hour < 18 -> "Good afternoon"
-        else -> "Good evening"
+        hour < 21 -> "Good evening"
+        else -> "Good night"
     }
 }
 
@@ -470,9 +485,11 @@ fun WeatherCard(weather: WeatherInfo?, onEditLocation: () -> Unit = {}) {
             }
 
             Surface(
-                modifier = Modifier.size(36.dp).clickable {
-                    onEditLocation()
-                },
+                modifier = Modifier
+                    .size(36.dp)
+                    .clickable {
+                        onEditLocation()
+                    },
                 shape = MaterialTheme.shapes.small,
                 color = MaterialTheme.colorScheme.tertiary,
             ) {
