@@ -4,7 +4,8 @@ import android.Manifest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.fziraki.daykit.DayKitClient
-import com.github.fziraki.daykit.providers.CalendarResult
+import com.github.fziraki.daykit.result.DataError
+import com.github.fziraki.daykit.result.Result
 import com.github.fziraki.makemyday.AppPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -116,16 +117,22 @@ class MyDayViewModel(
             )
 
             val (events, permissionDenied, error) = when (val result = summary.calendarResult) {
-                is CalendarResult.Success -> Triple(result.events, false, false)
-                CalendarResult.PermissionDenied -> Triple(emptyList(), true, false)
-                CalendarResult.Error -> Triple(emptyList(), false, true)
+                is Result.Success -> Triple(result.data, false, false)
+                is Result.Error -> when (result.error) {
+                    DataError.Local.PERMISSION_DENIED -> Triple(emptyList(), true, false)
+                    else -> Triple(emptyList(), false, true)
+                }
             }
 
+            val weatherInfo = when (val w = summary.weather) {
+                is Result.Success -> w.data
+                else -> null
+            }
             _state.update {
                 it.copy(
                     isLoading = false,
                     locationNotSet = savedLocation == null,
-                    weather = summary.weather,
+                    weather = weatherInfo,
                     events = events,
                     calendarPermissionDenied = permissionDenied,
                     calendarError = error,
