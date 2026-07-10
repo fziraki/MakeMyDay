@@ -29,9 +29,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EditLocationAlt
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.EditLocationAlt
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -145,7 +148,7 @@ fun MyDayScreen(
                 if (state.locationNotSet) {
                     WeatherNotSetCard(onTap = onNavigateToLocationSearch)
                 }else {
-                    WeatherCard(state.weather)
+                    WeatherCard(state.weather, onEditLocation = onNavigateToLocationSearch)
                 }
             }
 
@@ -433,7 +436,7 @@ fun SectionLabel(text: String) {
 }
 
 @Composable
-fun WeatherCard(weather: WeatherInfo?) {
+fun WeatherCard(weather: WeatherInfo?, onEditLocation: () -> Unit = {}) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -443,17 +446,20 @@ fun WeatherCard(weather: WeatherInfo?) {
         border = BorderStroke(width = 0.5.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (weather == null) {
                 Text(
                     "Weather unavailable",
+                    modifier = Modifier.weight(1f),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text("${weather.tempC}°C, ${weather.condition}", fontWeight = FontWeight.Medium)
                     Text(
                         "${weather.city} · feels like ${weather.tempC}°C",
@@ -461,6 +467,21 @@ fun WeatherCard(weather: WeatherInfo?) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+
+            Surface(
+                modifier = Modifier.size(36.dp).clickable {
+                    onEditLocation()
+                },
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.tertiary,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.EditLocationAlt,
+                    contentDescription = "Change city",
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(8.dp)
+                )
             }
         }
     }
