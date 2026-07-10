@@ -1,6 +1,7 @@
 package com.github.fziraki.makemyday.onboarding
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.github.fziraki.makemyday.ui.theme.MakeMyDayTheme
 import kotlinx.coroutines.launch
 
 sealed interface OnboardingPage {
@@ -60,6 +63,7 @@ fun OnboardingScreen(
 
     Column(
         modifier = Modifier
+            .background(color = MaterialTheme.colorScheme.background)
             .fillMaxSize()
             .padding(
                 WindowInsets.systemBars
@@ -117,7 +121,13 @@ fun OnboardingScreen(
             shape = MaterialTheme.shapes.medium,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .height(52.dp),
+            colors = ButtonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                disabledContainerColor = MaterialTheme.colorScheme.primary,
+                disabledContentColor = MaterialTheme.colorScheme.onPrimary,
+            )
         ) {
             Text(
                 text = if (pagerState.currentPage == pages.lastIndex)
@@ -155,9 +165,9 @@ private fun DotsIndicator(
                 Surface(
                     shape = MaterialTheme.shapes.small,
                     color = if (selected)
-                        MaterialTheme.colorScheme.primary
+                        MaterialTheme.colorScheme.secondary
                     else
-                        MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                        MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.fillMaxSize()
                 ) {}
             }

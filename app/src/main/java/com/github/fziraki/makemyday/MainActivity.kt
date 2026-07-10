@@ -3,13 +3,13 @@ package com.github.fziraki.makemyday
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import androidx.compose.runtime.collectAsState
+import com.github.fziraki.makemyday.ui.theme.MakeMyDayTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -18,8 +18,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         val splashScreen = installSplashScreen()
-
-        super.onCreate(savedInstanceState)
 
         val onboardingCompleted = MutableStateFlow<Boolean?>(null)
 
@@ -33,8 +31,12 @@ class MainActivity : ComponentActivity() {
             onboardingCompleted.value == null
         }
 
+        super.onCreate(savedInstanceState)
+
+
+
         setContent {
-            MaterialTheme {
+            MakeMyDayTheme {
                 onboardingCompleted.collectAsState().value?.let {
                     AppNavHost(it, preferences)
                 }

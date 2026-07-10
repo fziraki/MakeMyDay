@@ -33,13 +33,13 @@ fun WelcomePage() {
     ) {
         Surface(
             shape = MaterialTheme.shapes.large,
-            color = MaterialTheme.colorScheme.surfaceVariant,
+            color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.size(64.dp)
         ) {
             Icon(
                 imageVector = Icons.Outlined.WbSunny,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
@@ -51,7 +51,8 @@ fun WelcomePage() {
         Text(
             text = "Make My Day",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(Modifier.height(8.dp))
@@ -59,7 +60,7 @@ fun WelcomePage() {
         Text(
             text = "Your day, at a glance — weather, calendar\nand music in one place.",
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onBackground,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
 
@@ -98,13 +99,13 @@ private fun WelcomeFeatureRow(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.size(20.dp)
         )
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }

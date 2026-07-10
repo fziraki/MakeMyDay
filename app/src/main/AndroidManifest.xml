@@ -15,8 +15,8 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.MakeMyDay"
+            android:splashScreenTheme="@style/Theme.MakeMyDay.Splash"
+            tools:targetApi="31"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

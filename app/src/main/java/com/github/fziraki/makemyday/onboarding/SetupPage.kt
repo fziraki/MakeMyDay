@@ -1,6 +1,7 @@
 package com.github.fziraki.makemyday.onboarding
 
 import android.Manifest
+import android.R
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -90,12 +91,13 @@ fun SetupPage(
         Text(
             text = "Set up",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground
         )
         Text(
             text = "Everything is optional. Add what you want now, change it anytime.",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(Modifier.height(8.dp))
@@ -172,14 +174,14 @@ private fun SetupRow(
     onClick: () -> Unit
 ) {
     val containerColor = if (isGranted)
-        MaterialTheme.colorScheme.primaryContainer
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
     else
-        MaterialTheme.colorScheme.surfaceVariant
+        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
 
     val borderColor = if (isGranted)
         MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
     else
-        MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        MaterialTheme.colorScheme.tertiary
 
     Surface(
         color = containerColor,
@@ -201,16 +203,13 @@ private fun SetupRow(
         ) {
             Surface(
                 shape = MaterialTheme.shapes.small,
-                color = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.size(36.dp)
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (isGranted)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(8.dp)
                 )
             }
@@ -218,7 +217,8 @@ private fun SetupRow(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = subtitle,
@@ -229,10 +229,7 @@ private fun SetupRow(
             Icon(
                 imageVector = if (isGranted) Icons.Outlined.Done else Icons.Outlined.ChevronRight,
                 contentDescription = null,
-                tint = if (isGranted)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -248,15 +245,14 @@ private fun SetupMusicRow(
 ) {
 
     val containerColor = if (isGranted)
-        MaterialTheme.colorScheme.primaryContainer
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
     else
-        MaterialTheme.colorScheme.surfaceVariant
+        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
 
     val borderColor = if (isGranted)
         MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
     else
-        MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-
+        MaterialTheme.colorScheme.tertiary
 
     val focusManager = LocalFocusManager.current
 
@@ -277,16 +273,13 @@ private fun SetupMusicRow(
         ) {
             Surface(
                 shape = MaterialTheme.shapes.small,
-                color = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.size(36.dp)
             ) {
                 Icon(
                     imageVector = Icons.Outlined.MusicNote,
                     contentDescription = null,
-                    tint = if (isGranted)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(8.dp)
                 )
             }
@@ -294,7 +287,8 @@ private fun SetupMusicRow(
                 Text(
                     text = "Music",
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "An artist you love",
@@ -335,10 +329,7 @@ private fun SetupMusicRow(
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = "Done",
-                                    tint = if (isGranted)
-                                        MaterialTheme.colorScheme.primary
-                                    else
-                                        MaterialTheme.colorScheme.onSurfaceVariant,
+                                    tint = MaterialTheme.colorScheme.secondary,
                                 )
                             }
                         }

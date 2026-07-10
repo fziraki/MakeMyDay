@@ -6,9 +6,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,6 +47,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -78,8 +81,6 @@ fun MyDayScreen(
 
     val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
 
-    Log.d("tagg","isPlaying $isPlaying")
-
     val context = LocalContext.current
 
     val calendarAsked by viewModel.isCalendarAsked
@@ -92,6 +93,7 @@ fun MyDayScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
 
             TopAppBar(
@@ -100,20 +102,22 @@ fun MyDayScreen(
                         Text(
                             text = todayLabel(),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = greeting(),
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
             )
         }
-
-
-
     ) { padding ->
 
         if (state.isLoading) {
@@ -183,7 +187,11 @@ fun MyDayScreen(
                                 }
                             },
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
+                            containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+                        ),
+                        border = BorderStroke(
+                            width = 0.5.dp,
+                            color = MaterialTheme.colorScheme.tertiary
                         )
                     ) {
                         Row(
@@ -275,16 +283,26 @@ private fun SetupMusicRow(
     onGetTrackClicked: () -> Unit
 ) {
 
+    val containerColor = if (!artistInput.isNullOrEmpty())
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+    else
+        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+
+    val borderColor = if (!artistInput.isNullOrEmpty())
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+    else
+        MaterialTheme.colorScheme.tertiary
+
     val focusManager = LocalFocusManager.current
 
     Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = containerColor,
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier
             .fillMaxWidth()
             .border(
                 width = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                color = borderColor,
                 shape = MaterialTheme.shapes.medium
             )
     ) {
@@ -294,13 +312,13 @@ private fun SetupMusicRow(
         ) {
             Surface(
                 shape = MaterialTheme.shapes.small,
-                color = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.size(36.dp)
             ) {
                 Icon(
                     imageVector = Icons.Outlined.MusicNote,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(8.dp)
                 )
             }
@@ -308,7 +326,8 @@ private fun SetupMusicRow(
                 Text(
                     text = "Music",
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "An artist you love",
@@ -349,7 +368,7 @@ private fun SetupMusicRow(
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = "Done",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    tint = MaterialTheme.colorScheme.secondary,
                                 )
                             }
                         }
@@ -368,6 +387,12 @@ private fun SetupMusicRow(
                         onGetTrackClicked()
                     },
                     shape = MaterialTheme.shapes.medium,
+                    colors = ButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.primary,
+                        disabledContentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)
@@ -409,9 +434,13 @@ fun SectionLabel(text: String) {
 
 @Composable
 fun WeatherCard(weather: WeatherInfo?) {
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+        ),
+        border = BorderStroke(width = 0.5.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -439,13 +468,15 @@ fun WeatherCard(weather: WeatherInfo?) {
 
 @Composable
 fun WeatherNotSetCard(onTap: () -> Unit) {
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onTap() },
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
+        ),
+        border = BorderStroke(width = 0.5.dp, color = MaterialTheme.colorScheme.tertiary)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -455,7 +486,7 @@ fun WeatherNotSetCard(onTap: () -> Unit) {
             Icon(
                 imageVector = Icons.Outlined.Cloud,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.size(20.dp)
             )
             Column {
@@ -508,7 +539,9 @@ fun DiscoverCard(
     SectionLabel("Listen to the preview:")
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+        ),
     ) {
         Row(
             modifier = Modifier
@@ -521,8 +554,8 @@ fun DiscoverCard(
                 modifier = Modifier
                     .size(36.dp)
                     .background(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        shape = MaterialTheme.shapes.small
+                        color = MaterialTheme.colorScheme.tertiary,
+                        shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -538,7 +571,7 @@ fun DiscoverCard(
                         else
                             Icons.Default.PlayArrow,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.secondary
                     )
                 }
             }
