@@ -13,6 +13,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Cloud
@@ -55,6 +58,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -79,6 +83,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun MyDayScreen(
     onNavigateToLocationSearch: () -> Unit,
+    themeMode: String,
+    onToggleTheme: () -> Unit,
     viewModel: MyDayViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -96,43 +102,68 @@ fun MyDayScreen(
         if (granted) viewModel.onAction(MyDayAction.RetryCalendar)
     }
 
+    val showLightIcon = when (themeMode) {
+        "dark" -> true
+        "light" -> false
+        else -> isSystemInDarkTheme()
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-
             TopAppBar(
                 title = {
-                    Column {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Image(
-                            modifier = Modifier.height(36.dp),
-                            painter = painterResource(R.drawable.sun),
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Image(
-                            modifier = Modifier.height(20.dp),
-                            painter = painterResource(R.drawable.name),
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = todayLabel(),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Text(
-                            text = greeting(),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
+                    Column(
+                        modifier = Modifier
+                            .padding(vertical = 12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.Bottom
+                        ) {
+                            Image(
+                                modifier = Modifier.height(32.dp).padding(bottom = 4.dp),
+                                painter = painterResource(R.drawable.sun),
+                                contentDescription = null,
+                                colorFilter = ColorFilter.tint(color =
+                                    MaterialTheme.colorScheme.tertiary
+                                )
+                            )
+                            Image(
+                                modifier = Modifier.height(16.dp),
+                                painter = painterResource(R.drawable.name),
+                                contentDescription = null,
+                                colorFilter = ColorFilter.tint(color =
+                                    MaterialTheme.colorScheme.secondary
+                                )
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground
-                )
+                ),
+                actions = {
+                    IconButton(
+                        onClick = {
+                            onToggleTheme()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (showLightIcon)
+                                Icons.Default.LightMode
+                            else
+                                Icons.Default.DarkMode,
+                            contentDescription = null,
+                            tint = if (showLightIcon)
+                                MaterialTheme.colorScheme.secondary
+                            else
+                                MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             )
         }
     ) { padding ->
@@ -155,8 +186,10 @@ fun MyDayScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item { Spacer(Modifier.height(4.dp)) }
-
+            item {
+                Spacer(modifier = Modifier.height(4.dp))
+                TodayCard()
+            }
 
             item {
                 if (state.locationNotSet) {
@@ -289,6 +322,24 @@ fun MyDayScreen(
             item { Spacer(Modifier.height(16.dp)) }
         }
     }
+}
+
+@Composable
+fun TodayCard() {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = todayLabel(),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Text(
+            text = greeting(),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+
 }
 
 

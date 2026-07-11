@@ -29,6 +29,9 @@ class AppPreferences(
         private val FAVORITE_ARTIST =
             stringPreferencesKey("favorite_artist")
 
+        private val THEME_MODE =
+            stringPreferencesKey("theme_mode")
+
         private val json = Json {
             ignoreUnknownKeys = true
         }
@@ -89,4 +92,15 @@ class AppPreferences(
         dataStore.data.map { preferences ->
             preferences[FAVORITE_ARTIST]
         }
+
+    // -------------------------
+    // Theme Mode
+    // -------------------------
+
+    val themeMode: Flow<String> =
+        dataStore.data.map { it[THEME_MODE] ?: "system" }
+
+    suspend fun setThemeMode(mode: String) {
+        dataStore.edit { it[THEME_MODE] = mode }
+    }
 }
