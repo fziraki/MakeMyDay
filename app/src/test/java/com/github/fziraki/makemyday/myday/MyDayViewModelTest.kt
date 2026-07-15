@@ -98,9 +98,10 @@ class MyDayViewModelTest {
         val state = vm.state.value
         assertFalse(state.isLoading)
         assertFalse(state.locationNotSet)
-        assertEquals(15.0, state.weather!!.tempC, 0.01)
-        assertEquals("Cloudy", state.weather?.condition)
-        assertEquals("London", state.weather?.city)
+        val weather = state.weather!!
+        assertEquals(15.0, weather.tempC, 0.01)
+        assertEquals("Cloudy", weather.condition)
+        assertEquals("London", weather.city)
         assertEquals(1, state.events.size)
         assertEquals("Meeting", state.events[0].title)
     }
@@ -195,7 +196,7 @@ class FakeCalendarProvider : CalendarProvider {
 class FakeMusicProvider : MusicProvider {
     var result: Result<Track, DataError.Network> = Result.Error(DataError.Network.SERVER_ERROR)
 
-    override suspend fun getRecommendedTrack(artist: String): Result<Track, DataError.Network> {
+    override suspend fun getRecommendedTrack(favoriteArtist: String): Result<Track, DataError.Network> {
         return result
     }
 }

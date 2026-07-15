@@ -67,6 +67,7 @@ class LocationSearchViewModelTest {
         )
 
         vm.onAction(LocationSearchAction.LocationSelected(location))
+        testDispatcher.scheduler.advanceUntilIdle()
 
         val saved = fakePreferences.savedLocation.first()
         assertNotNull(saved)
@@ -101,7 +102,7 @@ class FakeCalendarForSearchProvider : com.github.fziraki.daykit.providers.Calend
 }
 
 class FakeMusicForSearchProvider : com.github.fziraki.daykit.providers.MusicProvider {
-    override suspend fun getRecommendedTrack(artist: String): com.github.fziraki.daykit.result.Result<com.github.fziraki.daykit.model.Track, com.github.fziraki.daykit.result.DataError.Network> {
+    override suspend fun getRecommendedTrack(favoriteArtist: String): com.github.fziraki.daykit.result.Result<com.github.fziraki.daykit.model.Track, com.github.fziraki.daykit.result.DataError.Network> {
         return com.github.fziraki.daykit.result.Result.Error(com.github.fziraki.daykit.result.DataError.Network.SERVER_ERROR)
     }
 }
