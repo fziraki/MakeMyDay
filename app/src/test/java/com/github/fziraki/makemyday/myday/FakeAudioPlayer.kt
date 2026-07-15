@@ -20,10 +20,6 @@ class FakeAudioPlayer : AudioPlayer {
         _isPlaying.value = false
     }
 
-    override fun stop() {
-        _isPlaying.value = false
-    }
-
     override fun release() {
         _isPlaying.value = false
     }

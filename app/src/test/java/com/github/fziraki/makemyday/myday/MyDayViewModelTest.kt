@@ -98,7 +98,7 @@ class MyDayViewModelTest {
         val state = vm.state.value
         assertFalse(state.isLoading)
         assertFalse(state.locationNotSet)
-        assertEquals(15.0, state.weather?.tempC, 0.01)
+        assertEquals(15.0, state.weather!!.tempC, 0.01)
         assertEquals("Cloudy", state.weather?.condition)
         assertEquals("London", state.weather?.city)
         assertEquals(1, state.events.size)
