@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,7 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.github.fziraki.daykit.model.LocationResult
+import com.github.fziraki.makemyday.locationsearch.model.LocationResultUi
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,8 +50,15 @@ fun LocationSearchScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(title = { Text("Your location") })
+            TopAppBar(
+                title = { Text("Your location") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
+            )
         }
     ) { padding ->
         Column(
@@ -110,7 +118,7 @@ fun LocationSearchScreen(
 
 @Composable
 private fun LocationResultRow(
-    location: LocationResult,
+    location: LocationResultUi,
     onClick: () -> Unit
 ) {
     Row(
@@ -124,7 +132,7 @@ private fun LocationResultRow(
         Icon(
             imageVector = Icons.Outlined.LocationOn,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.size(18.dp)
         )
         Column {

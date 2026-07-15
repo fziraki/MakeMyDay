@@ -1,16 +1,23 @@
 package com.github.fziraki.daykit
 
 import android.content.Context
-import com.github.fziraki.daykit.di.ServiceLocator
-import com.github.fziraki.daykit.di.ServiceLocator.locationDataSource
 import com.github.fziraki.daykit.internal.calendar.AndroidCalendarProvider
+import com.github.fziraki.daykit.internal.music.DeezerMusicProvider
+import com.github.fziraki.daykit.internal.weather.NominatimLocationSearchRepository
+import com.github.fziraki.daykit.internal.weather.OpenMeteoWeatherProvider
 import com.github.fziraki.daykit.model.LocationResult
 import com.github.fziraki.daykit.model.MyDaySummary
+import com.github.fziraki.daykit.model.Track
 import com.github.fziraki.daykit.model.WeatherInfo
+import com.github.fziraki.daykit.network.HttpClientFactory
+import com.github.fziraki.daykit.network.getEngine
 import com.github.fziraki.daykit.providers.CalendarProvider
-import com.github.fziraki.daykit.providers.CalendarResult
+import com.github.fziraki.daykit.providers.LocationSearchRepository
 import com.github.fziraki.daykit.providers.MusicProvider
 import com.github.fziraki.daykit.providers.WeatherProvider
+import com.github.fziraki.daykit.result.DataError
+import com.github.fziraki.daykit.result.Result
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
@@ -18,6 +25,7 @@ class DayKitClient private constructor(
     private val weather: WeatherProvider,
     private val calendar: CalendarProvider,
     private val music: MusicProvider,
+    private val locationSearch: LocationSearchRepository,
 ) {
 
     // ===== Aggregation API =====
@@ -50,31 +58,27 @@ class DayKitClient private constructor(
 
     // ===== Location / Search =====
     suspend fun searchCity(query: String): List<LocationResult> =
-        locationDataSource.search(query)
+        locationSearch.search(query)
 
     // ===== Weather =====
-    suspend fun getWeather(lat: Double, lon: Double, city: String): WeatherInfo? =
-        runCatching {
-            weather.getCurrentWeather(lat, lon, city)
-        }.getOrNull()
+    suspend fun getWeather(lat: Double, lon: Double, city: String): Result<WeatherInfo, DataError.Network> =
+        weather.getCurrentWeather(lat, lon, city)
 
     // ===== Calendar =====
-    suspend fun getTodayEvents(): CalendarResult =
-        runCatching { calendar.getTodayEvents() }
-            .getOrDefault(CalendarResult.Error)
+    suspend fun getTodayEvents(): Result<List<com.github.fziraki.daykit.model.CalendarEvent>, DataError.Local> =
+        calendar.getTodayEvents()
 
     // ===== Music =====
-    suspend fun getRecommendedTrack(artist: String) =
-        runCatching { music.getRecommendedTrack(artist) }
-            .getOrNull()
+    suspend fun getRecommendedTrack(artist: String): Result<Track, DataError.Network> =
+        music.getRecommendedTrack(artist)
 
-
-
+    // ===== Builder =====
     class Builder(private val context: Context) {
 
         private var weather: WeatherProvider? = null
         private var calendar: CalendarProvider? = null
         private var music: MusicProvider? = null
+        private var locationSearch: LocationSearchRepository? = null
 
         fun weather(provider: WeatherProvider) = apply {
             weather = provider
@@ -88,11 +92,19 @@ class DayKitClient private constructor(
             music = provider
         }
 
+        fun locationSearch(provider: LocationSearchRepository) = apply {
+            locationSearch = provider
+        }
+
         fun build(): DayKitClient {
+            val httpClient by lazy {
+                HttpClientFactory.create(getEngine())
+            }
             return DayKitClient(
                 calendar = calendar ?: AndroidCalendarProvider(context),
-                weather = weather ?: ServiceLocator.weatherProvider,
-                music = music ?: ServiceLocator.musicProvider,
+                weather = weather ?: OpenMeteoWeatherProvider(httpClient),
+                music = music ?: DeezerMusicProvider(httpClient),
+                locationSearch = locationSearch ?: NominatimLocationSearchRepository(httpClient),
             )
         }
     }

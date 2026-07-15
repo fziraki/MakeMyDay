@@ -1,9 +1,12 @@
 package com.github.fziraki.daykit.internal.weather
 
 import com.github.fziraki.daykit.model.WeatherInfo
+import com.github.fziraki.daykit.network.safeCall
 import com.github.fziraki.daykit.providers.WeatherProvider
+import com.github.fziraki.daykit.result.DataError
+import com.github.fziraki.daykit.result.Result
+import com.github.fziraki.daykit.result.map
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
@@ -11,20 +14,22 @@ internal class OpenMeteoWeatherProvider(
     private val client: HttpClient
 ) : WeatherProvider {
 
-    override suspend fun getCurrentWeather(lat: Double, lon: Double, city: String): WeatherInfo {
-        val weatherResponse: OpenMeteoResponse = client.get("https://api.open-meteo.com/v1/forecast") {
-            parameter("latitude", lat)
-            parameter("longitude", lon)
-            parameter("current", "temperature_2m,apparent_temperature,weather_code")
-            parameter("timezone", "auto")
-        }.body()
-
-        return WeatherInfo(
-            tempC = weatherResponse.current.temperature,
-            feelsLikeC = weatherResponse.current.apparentTemperature,
-            condition = weatherCodeToCondition(weatherResponse.current.weatherCode),
-            city = city
-        )
+    override suspend fun getCurrentWeather(lat: Double, lon: Double, city: String): Result<WeatherInfo, DataError.Network> {
+        return safeCall<OpenMeteoResponse> {
+            client.get("https://api.open-meteo.com/v1/forecast") {
+                parameter("latitude", lat)
+                parameter("longitude", lon)
+                parameter("current", "temperature_2m,apparent_temperature,weather_code")
+                parameter("timezone", "auto")
+            }
+        }.map { response ->
+            WeatherInfo(
+                tempC = response.current.temperature,
+                feelsLikeC = response.current.apparentTemperature,
+                condition = weatherCodeToCondition(response.current.weatherCode),
+                city = city
+            )
+        }
     }
 
     private fun weatherCodeToCondition(code: Int): String = when (code) {

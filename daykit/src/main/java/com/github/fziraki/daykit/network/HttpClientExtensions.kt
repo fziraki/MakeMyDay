@@ -7,13 +7,8 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.RedirectResponseException
 import io.ktor.client.plugins.ServerResponseException
-import io.ktor.client.request.delete
 import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
@@ -25,31 +20,6 @@ suspend inline fun <reified Response : Any> HttpClient.getResult(
 ): Result<Response, DataError.Network> =
     safeCall {
         get(route) {
-            queryParameters.forEach { (key, value) ->
-                if (value != null) {
-                    url.parameters.append(key, value.toString())
-                }
-            }
-        }
-    }
-
-suspend inline fun <reified Request, reified Response : Any> HttpClient.postResult(
-    route: String,
-    body: Request,
-): Result<Response, DataError.Network> =
-    safeCall {
-        post(route) {
-            contentType(ContentType.Application.Json)
-            setBody(body)
-        }
-    }
-
-suspend inline fun <reified Response : Any> HttpClient.deleteResult(
-    route: String,
-    queryParameters: Map<String, Any?> = emptyMap(),
-): Result<Response, DataError.Network> =
-    safeCall {
-        delete(route) {
             queryParameters.forEach { (key, value) ->
                 if (value != null) {
                     url.parameters.append(key, value.toString())

@@ -51,11 +51,6 @@ class ExoAudioPlayer(
         player?.pause()
     }
 
-    override fun stop() {
-        player?.stop()
-        _isPlaying.value = false
-    }
-
     override fun release() {
         player?.release()
         player = null
