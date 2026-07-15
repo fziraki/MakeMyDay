@@ -1,13 +1,15 @@
 package com.github.fziraki.makemyday.myday
 
 import com.github.fziraki.daykit.model.Track
-import com.github.fziraki.daykit.result.*
+import com.github.fziraki.daykit.result.DataError
+import com.github.fziraki.daykit.result.Result
+import com.github.fziraki.makemyday.myday.model.toTrackUi
 
 fun Result<Track, DataError.Network>?.toMusicUiState(): MusicUiState {
     return when (this) {
         null -> MusicUiState.Idle
 
-        is Result.Success -> MusicUiState.Success(data)
+        is Result.Success -> MusicUiState.Success(data.toTrackUi())
 
         is Result.Error -> MusicUiState.Error(
             message = error.toUserMessage(),
@@ -16,7 +18,8 @@ fun Result<Track, DataError.Network>?.toMusicUiState(): MusicUiState {
                 DataError.Network.SERVER_ERROR,
                 DataError.Network.REQUEST_TIMEOUT -> ErrorAction.RETRY
 
-                DataError.Network.INVALID_ARTIST -> ErrorAction.EDIT_ARTIST
+                DataError.Network.INVALID_ARTIST,
+                DataError.Network.NOT_FOUND -> ErrorAction.EDIT_ARTIST
                 else -> { ErrorAction.RETRY }
             }
         )
@@ -28,6 +31,7 @@ fun DataError.Network.toUserMessage(): String =
         DataError.Network.NO_INTERNET -> "No internet connection."
         DataError.Network.REQUEST_TIMEOUT -> "Request timed out."
         DataError.Network.SERVER_ERROR -> "Server error."
-        DataError.Network.INVALID_ARTIST -> "Artist not found."
+        DataError.Network.INVALID_ARTIST,
+        DataError.Network.NOT_FOUND -> "Artist not found."
         else -> {"Something went wrong!"}
     }

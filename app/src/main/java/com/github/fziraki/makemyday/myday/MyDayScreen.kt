@@ -68,9 +68,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.github.fziraki.daykit.model.CalendarEvent
-import com.github.fziraki.daykit.model.Track
-import com.github.fziraki.daykit.model.WeatherInfo
+import com.github.fziraki.makemyday.myday.model.CalendarEventUi
+import com.github.fziraki.makemyday.myday.model.TrackUi
+import com.github.fziraki.makemyday.myday.model.WeatherUi
 import com.github.fziraki.makemyday.R
 import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
@@ -126,17 +126,19 @@ fun MyDayScreen(
                                 modifier = Modifier.height(32.dp).padding(bottom = 4.dp),
                                 painter = painterResource(R.drawable.sun),
                                 contentDescription = null,
-                                colorFilter = ColorFilter.tint(color =
-                                    MaterialTheme.colorScheme.tertiary
-                                )
+                                colorFilter = if (showLightIcon)
+                                    ColorFilter.tint(color =MaterialTheme.colorScheme.tertiary)
+                                else
+                                    ColorFilter.tint(color =MaterialTheme.colorScheme.secondary)
                             )
                             Image(
                                 modifier = Modifier.height(16.dp),
                                 painter = painterResource(R.drawable.name),
                                 contentDescription = null,
-                                colorFilter = ColorFilter.tint(color =
-                                    MaterialTheme.colorScheme.secondary
-                                )
+                                colorFilter = if (showLightIcon)
+                                    ColorFilter.tint(color =MaterialTheme.colorScheme.secondary)
+                                else
+                                    ColorFilter.tint(color =MaterialTheme.colorScheme.primary)
                             )
                         }
                     }
@@ -298,7 +300,14 @@ fun MyDayScreen(
 
             when(val result = state.musicUiState){
                 is MusicUiState.Error -> {
-
+                    item {
+                        Text(
+                            text = result.message,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
                 }
                 MusicUiState.Idle -> {
 
@@ -502,7 +511,7 @@ fun SectionLabel(text: String) {
 }
 
 @Composable
-fun WeatherCard(weather: WeatherInfo?, onEditLocation: () -> Unit = {}) {
+fun WeatherCard(weather: WeatherUi?, onEditLocation: () -> Unit = {}) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -595,7 +604,7 @@ fun WeatherNotSetCard(onTap: () -> Unit) {
 
 
 @Composable
-fun EventRow(event: CalendarEvent) {
+fun EventRow(event: CalendarEventUi) {
     val time = formatEventTime(event)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
@@ -621,7 +630,7 @@ fun EventRow(event: CalendarEvent) {
 
 @Composable
 fun DiscoverCard(
-    track: Track,
+    track: TrackUi,
     isPlaying: Boolean,
     onPlayPause: (String) -> Unit
 ) {
@@ -676,7 +685,7 @@ fun DiscoverCard(
     }
 }
 
-private fun formatEventTime(event: CalendarEvent): String {
+private fun formatEventTime(event: CalendarEventUi): String {
     if (event.isAllDay) return "All day"
     val zone = ZoneId.systemDefault()
     val start = Instant.ofEpochMilli(event.startTime)

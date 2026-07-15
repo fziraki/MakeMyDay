@@ -3,7 +3,7 @@ package com.github.fziraki.daykit
 import android.content.Context
 import com.github.fziraki.daykit.internal.calendar.AndroidCalendarProvider
 import com.github.fziraki.daykit.internal.music.DeezerMusicProvider
-import com.github.fziraki.daykit.internal.weather.NominatimDataSource
+import com.github.fziraki.daykit.internal.weather.NominatimLocationSearchRepository
 import com.github.fziraki.daykit.internal.weather.OpenMeteoWeatherProvider
 import com.github.fziraki.daykit.model.LocationResult
 import com.github.fziraki.daykit.model.MyDaySummary
@@ -104,7 +104,7 @@ class DayKitClient private constructor(
                 calendar = calendar ?: AndroidCalendarProvider(context),
                 weather = weather ?: OpenMeteoWeatherProvider(httpClient),
                 music = music ?: DeezerMusicProvider(httpClient),
-                locationSearch = locationSearch ?: NominatimDataSource(httpClient),
+                locationSearch = locationSearch ?: NominatimLocationSearchRepository(httpClient),
             )
         }
     }

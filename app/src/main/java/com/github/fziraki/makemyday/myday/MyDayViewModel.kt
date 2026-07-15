@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.github.fziraki.daykit.DayKitClient
 import com.github.fziraki.daykit.result.DataError
 import com.github.fziraki.daykit.result.Result
-import com.github.fziraki.makemyday.AppPreferences
+import com.github.fziraki.makemyday.data.PreferencesRepository
+import com.github.fziraki.makemyday.myday.model.toCalendarEventUi
+import com.github.fziraki.makemyday.myday.model.toWeatherUi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -15,7 +17,7 @@ import kotlinx.coroutines.launch
 
 class MyDayViewModel(
     private val client: DayKitClient,
-    private val preferences: AppPreferences,
+    private val preferences: PreferencesRepository,
     private val audioPlayer: AudioPlayer
 ) : ViewModel() {
 
@@ -117,7 +119,7 @@ class MyDayViewModel(
             )
 
             val (events, permissionDenied, error) = when (val result = summary.calendarResult) {
-                is Result.Success -> Triple(result.data, false, false)
+                is Result.Success -> Triple(result.data.map { it.toCalendarEventUi() }, false, false)
                 is Result.Error -> when (result.error) {
                     DataError.Local.PERMISSION_DENIED -> Triple(emptyList(), true, false)
                     else -> Triple(emptyList(), false, true)
@@ -125,7 +127,7 @@ class MyDayViewModel(
             }
 
             val weatherInfo = when (val w = summary.weather) {
-                is Result.Success -> w.data
+                is Result.Success -> w.data.toWeatherUi()
                 else -> null
             }
             _state.update {

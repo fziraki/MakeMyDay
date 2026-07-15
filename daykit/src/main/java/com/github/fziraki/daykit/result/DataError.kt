@@ -21,8 +21,6 @@ sealed interface DataError : Error {
 
     enum class Local : DataError {
         PERMISSION_DENIED,
-        DISK_FULL,
-        NOT_FOUND,
         UNKNOWN,
     }
 }

@@ -4,7 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.fziraki.daykit.DayKitClient
-import com.github.fziraki.makemyday.AppPreferences
+import com.github.fziraki.makemyday.data.PreferencesRepository
+import com.github.fziraki.makemyday.locationsearch.model.toLocationResultUi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +19,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(FlowPreview::class)
 class LocationSearchViewModel(
     private val client: DayKitClient,
-    private val preferences: AppPreferences
+    private val preferences: PreferencesRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LocationSearchState())
@@ -34,7 +35,7 @@ class LocationSearchViewModel(
                 .filter { it.length >= 2 }
                 .collect { query ->
                     _state.update { it.copy(isLoading = true) }
-                    val results = client.searchCity(query)
+                    val results = client.searchCity(query).map { it.toLocationResultUi() }
                     Log.d("tagg","results $results")
                     _state.update { it.copy(results = results, isLoading = false) }
                 }
@@ -49,7 +50,13 @@ class LocationSearchViewModel(
             }
             is LocationSearchAction.LocationSelected -> {
                 viewModelScope.launch {
-                    preferences.saveLocation(action.location)
+                    val domain = com.github.fziraki.daykit.model.LocationResult(
+                        city = action.location.city,
+                        country = action.location.country,
+                        lat = action.location.lat,
+                        lon = action.location.lon
+                    )
+                    preferences.saveLocation(domain)
                     _state.update { it.copy(selectedLocation = action.location) }
                 }
             }

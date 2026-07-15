@@ -2,6 +2,7 @@ package com.github.fziraki.makemyday.di
 
 import com.github.fziraki.daykit.DayKitClient
 import com.github.fziraki.makemyday.AppPreferences
+import com.github.fziraki.makemyday.data.PreferencesRepository
 import com.github.fziraki.makemyday.locationsearch.LocationSearchViewModel
 import com.github.fziraki.makemyday.myday.AudioPlayer
 import com.github.fziraki.makemyday.myday.ExoAudioPlayer
@@ -13,7 +14,7 @@ import org.koin.dsl.module
 
 val appModule = module {
 
-    single {
+    single<PreferencesRepository> {
         AppPreferences(get())
     }
 

@@ -3,14 +3,14 @@ package com.github.fziraki.makemyday.onboarding
 import android.Manifest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.fziraki.makemyday.AppPreferences
+import com.github.fziraki.makemyday.data.PreferencesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SetupPageViewModel(
-    private val preferences: AppPreferences
+    private val preferences: PreferencesRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SetupState())

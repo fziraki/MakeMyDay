@@ -1,7 +1,6 @@
 package com.github.fziraki.makemyday.onboarding
 
 import android.Manifest
-import android.R
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager

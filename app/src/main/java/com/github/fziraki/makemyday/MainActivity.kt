@@ -10,6 +10,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import com.github.fziraki.makemyday.data.PreferencesRepository
 import org.koin.android.ext.android.inject
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,7 +19,7 @@ import com.github.fziraki.makemyday.ui.theme.MakeMyDayTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val preferences: AppPreferences by inject()
+    private val preferences: PreferencesRepository by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 

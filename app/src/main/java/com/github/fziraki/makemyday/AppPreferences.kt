@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.github.fziraki.daykit.model.LocationResult
+import com.github.fziraki.makemyday.data.PreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
@@ -15,7 +16,7 @@ private val Context.dataStore by preferencesDataStore("app_preferences")
 
 class AppPreferences(
     context: Context
-) {
+) : PreferencesRepository {
 
     private val dataStore = context.dataStore
 
@@ -41,12 +42,12 @@ class AppPreferences(
     // Onboarding
     // -------------------------
 
-    val onboardingCompleted: Flow<Boolean> =
+    override val onboardingCompleted: Flow<Boolean> =
         dataStore.data.map {
             it[ONBOARDING_COMPLETED]?:false
         }
 
-    suspend fun completeOnboarding() {
+    override suspend fun completeOnboarding() {
         dataStore.edit {
             it[ONBOARDING_COMPLETED] = true
         }
@@ -56,24 +57,24 @@ class AppPreferences(
     // Generic permission flags
     // -------------------------
 
-    fun wasAsked(permission: String): Flow<Boolean> =
+    override fun wasAsked(permission: String): Flow<Boolean> =
         dataStore.data.map {
             it[booleanPreferencesKey(permission)] ?: false
         }
 
-    suspend fun markAsked(permission: String) {
+    override suspend fun markAsked(permission: String) {
         dataStore.edit {
             it[booleanPreferencesKey(permission)] = true
         }
     }
 
-    suspend fun saveLocation(location: LocationResult) {
+    override suspend fun saveLocation(location: LocationResult) {
         dataStore.edit {
             it[SAVED_LOCATION] = json.encodeToString(location)
         }
     }
 
-    val savedLocation: Flow<LocationResult?> =
+    override val savedLocation: Flow<LocationResult?> =
         dataStore.data.map { preferences ->
             preferences[SAVED_LOCATION]?.let {
                 runCatching {
@@ -82,13 +83,13 @@ class AppPreferences(
             }
         }
 
-    suspend fun saveFavoriteArtist(artist: String) {
+    override suspend fun saveFavoriteArtist(artist: String) {
         dataStore.edit {
             it[FAVORITE_ARTIST] = artist
         }
     }
 
-    val savedFavoriteArtist: Flow<String?> =
+    override val savedFavoriteArtist: Flow<String?> =
         dataStore.data.map { preferences ->
             preferences[FAVORITE_ARTIST]
         }
@@ -97,10 +98,10 @@ class AppPreferences(
     // Theme Mode
     // -------------------------
 
-    val themeMode: Flow<String> =
+    override val themeMode: Flow<String> =
         dataStore.data.map { it[THEME_MODE] ?: "system" }
 
-    suspend fun setThemeMode(mode: String) {
+    override suspend fun setThemeMode(mode: String) {
         dataStore.edit { it[THEME_MODE] = mode }
     }
 }

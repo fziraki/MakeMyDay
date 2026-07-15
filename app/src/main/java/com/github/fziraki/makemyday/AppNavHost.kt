@@ -5,6 +5,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.github.fziraki.makemyday.data.PreferencesRepository
 import com.github.fziraki.makemyday.locationsearch.LocationSearchScreen
 import com.github.fziraki.makemyday.myday.MyDayScreen
 import com.github.fziraki.makemyday.onboarding.OnboardingScreen
@@ -13,7 +14,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AppNavHost(
     onboardingCompleted: Boolean,
-    preferences: AppPreferences,
+    preferences: PreferencesRepository,
     themeMode: String,
     onToggleTheme: () -> Unit,
 ) {
