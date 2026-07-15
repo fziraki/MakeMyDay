@@ -35,6 +35,18 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
 }
 
+configurations {
+    androidLintTool {
+        resolutionStrategy {
+            eachDependency {
+                if (requested.group == "com.android.tools.lint" && requested.name == "lint-gradle") {
+                    useVersion("31.12.2")
+                }
+            }
+        }
+    }
+}
+
 afterEvaluate {
     publishing {
         publications {
