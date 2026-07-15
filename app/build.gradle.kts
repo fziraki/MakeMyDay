@@ -64,6 +64,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    implementation(project(":daykit"))
+    implementation("com.github.fziraki:daykit:0.1.0")
 
 }
