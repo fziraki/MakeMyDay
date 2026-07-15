@@ -1,7 +1,5 @@
 # MakeMyDay
 
-[![CI](https://github.com/fziraki/MakeMyDay/actions/workflows/ci.yml/badge.svg)](https://github.com/fziraki/MakeMyDay/actions/workflows/ci.yml)
-
 A morning-companion Android app that shows today's weather, calendar events, and
 a music recommendation — all in one glance.
 
