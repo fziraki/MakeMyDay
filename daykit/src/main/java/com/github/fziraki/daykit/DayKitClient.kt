@@ -2,93 +2,111 @@ package com.github.fziraki.daykit
 
 import android.content.Context
 import com.github.fziraki.daykit.internal.calendar.AndroidCalendarProvider
-import com.github.fziraki.daykit.internal.music.StubMusicProvider
-import com.github.fziraki.daykit.internal.todo.StubTodoProvider
-import com.github.fziraki.daykit.internal.weather.StubWeatherProvider
+import com.github.fziraki.daykit.internal.music.DeezerMusicProvider
+import com.github.fziraki.daykit.internal.weather.NominatimLocationSearchRepository
+import com.github.fziraki.daykit.internal.weather.OpenMeteoWeatherProvider
+import com.github.fziraki.daykit.model.LocationResult
 import com.github.fziraki.daykit.model.MyDaySummary
-import com.github.fziraki.daykit.providers.CalendarResult
+import com.github.fziraki.daykit.model.Track
+import com.github.fziraki.daykit.model.WeatherInfo
+import com.github.fziraki.daykit.network.HttpClientFactory
+import com.github.fziraki.daykit.network.getEngine
 import com.github.fziraki.daykit.providers.CalendarProvider
+import com.github.fziraki.daykit.providers.LocationSearchRepository
 import com.github.fziraki.daykit.providers.MusicProvider
-import com.github.fziraki.daykit.providers.TodoProvider
 import com.github.fziraki.daykit.providers.WeatherProvider
+import com.github.fziraki.daykit.result.DataError
+import com.github.fziraki.daykit.result.Result
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
 class DayKitClient private constructor(
-    private val calendar: CalendarProvider,
     private val weather: WeatherProvider,
-    private val todos: TodoProvider,
+    private val calendar: CalendarProvider,
     private val music: MusicProvider,
-    private val homeLat: Double,
-    private val homeLon: Double
+    private val locationSearch: LocationSearchRepository,
 ) {
 
-    suspend fun getMyDay(): MyDaySummary = coroutineScope {
+    // ===== Aggregation API =====
+    suspend fun getMyDay(
+        lat: Double? = null,
+        lon: Double? = null,
+        city: String? = null,
+        artist: String? = null
+    ): MyDaySummary = coroutineScope {
 
-        val eventsDeferred = async {
-            runCatching { calendar.getTodayEvents() }
-                .getOrDefault(CalendarResult.Error)
+        val weather = async {
+            if (lat != null && lon != null && city != null)
+                getWeather(lat, lon, city)
+            else null
         }
 
-        val weatherDeferred = async {
-            runCatching { weather.getCurrentWeather(homeLat, homeLon) }
-                .onFailure { if (it is kotlinx.coroutines.CancellationException) throw it }
-                .getOrNull()
-        }
+        val events = async { getTodayEvents() }
 
-        val tasksDeferred = async {
-            if (todos.isAuthenticated()) {
-                runCatching { todos.getPendingTasks() }
-                    .onFailure { if (it is kotlinx.coroutines.CancellationException) throw it }
-                    .getOrNull()
-            } else {
-                null
-            }
-        }
-
-        val trackDeferred = async {
-            runCatching { music.getRecommendedTrack() }
-                .onFailure { if (it is kotlinx.coroutines.CancellationException) throw it }
-                .getOrNull()
+        val track = async {
+            artist?.let { getRecommendedTrack(it) }
         }
 
         MyDaySummary(
-            calendarResult = eventsDeferred.await(),
-            weather = weatherDeferred.await(),
-            tasks = tasksDeferred.await(),
-            recommendedTrack = trackDeferred.await()
+            calendarResult = events.await(),
+            weather = weather.await(),
+            recommendedTrack = track.await()
         )
     }
 
-    suspend fun completeTask(id: String): Boolean {
-        if (!todos.isAuthenticated()) return false
-        return runCatching { todos.completeTask(id) }
-            .onFailure { if (it is kotlinx.coroutines.CancellationException) throw it }
-            .getOrDefault(false)
-    }
 
+    // ===== Location / Search =====
+    suspend fun searchCity(query: String): List<LocationResult> =
+        locationSearch.search(query)
+
+    // ===== Weather =====
+    suspend fun getWeather(lat: Double, lon: Double, city: String): Result<WeatherInfo, DataError.Network> =
+        weather.getCurrentWeather(lat, lon, city)
+
+    // ===== Calendar =====
+    suspend fun getTodayEvents(): Result<List<com.github.fziraki.daykit.model.CalendarEvent>, DataError.Local> =
+        calendar.getTodayEvents()
+
+    // ===== Music =====
+    suspend fun getRecommendedTrack(artist: String): Result<Track, DataError.Network> =
+        music.getRecommendedTrack(artist)
+
+    // ===== Builder =====
     class Builder(private val context: Context) {
 
-        private var latitude: Double? = null
-        private var longitude: Double? = null
+        private var weather: WeatherProvider? = null
+        private var calendar: CalendarProvider? = null
+        private var music: MusicProvider? = null
+        private var locationSearch: LocationSearchRepository? = null
 
-        fun setLocation(latitude: Double, longitude: Double) = apply {
-            this.latitude = latitude
-            this.longitude = longitude
+        fun weather(provider: WeatherProvider) = apply {
+            weather = provider
+        }
+
+        fun calendar(provider: CalendarProvider) = apply {
+            calendar = provider
+        }
+
+        fun music(provider: MusicProvider) = apply {
+            music = provider
+        }
+
+        fun locationSearch(provider: LocationSearchRepository) = apply {
+            locationSearch = provider
         }
 
         fun build(): DayKitClient {
-            val lat = requireNotNull(latitude) { "Location must be set before building DayKitClient." }
-            val lon = requireNotNull(longitude) { "Location must be set before building DayKitClient." }
-
+            val httpClient by lazy {
+                HttpClientFactory.create(getEngine())
+            }
             return DayKitClient(
-                calendar = AndroidCalendarProvider(context),
-                weather = StubWeatherProvider(),
-                todos = StubTodoProvider(),
-                music = StubMusicProvider(),
-                homeLat = lat,
-                homeLon = lon
+                calendar = calendar ?: AndroidCalendarProvider(context),
+                weather = weather ?: OpenMeteoWeatherProvider(httpClient),
+                music = music ?: DeezerMusicProvider(httpClient),
+                locationSearch = locationSearch ?: NominatimLocationSearchRepository(httpClient),
             )
         }
     }
+
 }

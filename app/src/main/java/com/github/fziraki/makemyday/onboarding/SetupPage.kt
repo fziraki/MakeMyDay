@@ -19,14 +19,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.CalendarToday
-import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -35,22 +38,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 
+
 @Composable
 fun SetupPage(
+    onNavigateToLocationSearch: () -> Unit,
     viewModel: SetupPageViewModel = koinViewModel(),
 ) {
 
@@ -79,8 +83,6 @@ fun SetupPage(
         }
     }
 
-    var artistInput by remember { mutableStateOf("") }
-
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -88,12 +90,13 @@ fun SetupPage(
         Text(
             text = "Set up",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground
         )
         Text(
             text = "Everything is optional. Add what you want now, change it anytime.",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(Modifier.height(8.dp))
@@ -102,9 +105,9 @@ fun SetupPage(
         SetupRow(
             icon = Icons.Outlined.Cloud,
             title = "Weather",
-            subtitle = "Set your city",
-            isGranted = false,
-            onClick = { /* navigate to location page */ }
+            subtitle = state.selectedCity.ifEmpty { "Set your city" },
+            isGranted = state.selectedCity.isNotBlank(),
+            onClick = onNavigateToLocationSearch
         )
 
         // Calendar — tappable, requests permission
@@ -147,19 +150,16 @@ fun SetupPage(
             }
         )
 
-        // Tasks — tappable, future
-        SetupRow(
-            icon = Icons.Outlined.CheckBox,
-            title = "Tasks",
-            subtitle = "Connect a todo app",
-            isGranted = false,
-            onClick = { /* future */ }
-        )
-
         // Music — inline input
         SetupMusicRow(
-            artistInput = artistInput,
-            onArtistChange = { artistInput = it }
+            artistInput = state.artistInput,
+            onArtistChange = {
+                viewModel.onAction(SetupAction.ArtistChanged(it))
+            },
+            isGranted = !state.artistInput.isNullOrEmpty(),
+            onDone = {
+                viewModel.onAction(SetupAction.OnDone)
+            }
         )
     }
 }
@@ -173,14 +173,14 @@ private fun SetupRow(
     onClick: () -> Unit
 ) {
     val containerColor = if (isGranted)
-        MaterialTheme.colorScheme.primaryContainer
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
     else
-        MaterialTheme.colorScheme.surfaceVariant
+        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
 
     val borderColor = if (isGranted)
         MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
     else
-        MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        MaterialTheme.colorScheme.tertiary
 
     Surface(
         color = containerColor,
@@ -202,16 +202,13 @@ private fun SetupRow(
         ) {
             Surface(
                 shape = MaterialTheme.shapes.small,
-                color = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.size(36.dp)
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (isGranted)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(8.dp)
                 )
             }
@@ -219,7 +216,8 @@ private fun SetupRow(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = subtitle,
@@ -230,10 +228,7 @@ private fun SetupRow(
             Icon(
                 imageVector = if (isGranted) Icons.Outlined.Done else Icons.Outlined.ChevronRight,
                 contentDescription = null,
-                tint = if (isGranted)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -242,17 +237,32 @@ private fun SetupRow(
 
 @Composable
 private fun SetupMusicRow(
-    artistInput: String,
-    onArtistChange: (String) -> Unit
+    artistInput: String?,
+    onArtistChange: (String) -> Unit,
+    isGranted: Boolean,
+    onDone: () -> Unit
 ) {
+
+    val containerColor = if (isGranted)
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+    else
+        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+
+    val borderColor = if (isGranted)
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+    else
+        MaterialTheme.colorScheme.tertiary
+
+    val focusManager = LocalFocusManager.current
+
     Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = containerColor,
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier
             .fillMaxWidth()
             .border(
                 width = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                color = borderColor,
                 shape = MaterialTheme.shapes.medium
             )
     ) {
@@ -262,13 +272,13 @@ private fun SetupMusicRow(
         ) {
             Surface(
                 shape = MaterialTheme.shapes.small,
-                color = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.size(36.dp)
             ) {
                 Icon(
                     imageVector = Icons.Outlined.MusicNote,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(8.dp)
                 )
             }
@@ -276,7 +286,8 @@ private fun SetupMusicRow(
                 Text(
                     text = "Music",
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "An artist you love",
@@ -285,7 +296,7 @@ private fun SetupMusicRow(
                 )
                 Spacer(Modifier.height(6.dp))
                 OutlinedTextField(
-                    value = artistInput,
+                    value = artistInput?:"",
                     onValueChange = onArtistChange,
                     placeholder = {
                         Text(
@@ -296,7 +307,32 @@ private fun SetupMusicRow(
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.small
+                    shape = MaterialTheme.shapes.small,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                            onDone()
+                        }
+                    ),
+                    trailingIcon = {
+                        if (!artistInput.isNullOrBlank()) {
+                            IconButton(
+                                onClick = {
+                                    focusManager.clearFocus()
+                                    onDone()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Done",
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                )
+                            }
+                        }
+                    }
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
