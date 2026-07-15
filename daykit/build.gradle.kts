@@ -18,6 +18,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
+
 }
 
 dependencies {
@@ -29,13 +35,15 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
 }
 
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            afterEvaluate { from(components["release"]) }
-            groupId = "com.github.fziraki"
-            artifactId = "daykit"
-            version = "0.1.0"
+afterEvaluate {
+    publishing {
+        publications {
+            register<MavenPublication>("release") {
+                from(components["release"])
+                groupId = "com.github.fziraki"
+                artifactId = "daykit"
+                version = "0.1.0"
+            }
         }
     }
 }
