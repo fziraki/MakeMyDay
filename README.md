@@ -2,17 +2,21 @@
 
 [![CI](https://github.com/fziraki/MakeMyDay/actions/workflows/ci.yml/badge.svg)](https://github.com/fziraki/MakeMyDay/actions/workflows/ci.yml)
 
-A morning-companion Android app that shows today's weather, calendar events, and a music recommendation — all in one glance.
+A morning-companion Android app that shows today's weather, calendar events, and
+a music recommendation — all in one glance.
+
 A playground for building and publishing an Android SDK.
 
 > **Download the latest APK** → [Download](https://nightly.link/fziraki/MakeMyDay/workflows/ci.yml/develop/app-debug.zip)
 
 ## Screenshots
 
-![Screenshot 0](screenshots/Screenshot_0.png)
-![Screenshot 1](screenshots/Screenshot_1.png)
-![Screenshot 2](screenshots/Screenshot_2.png)
-![Screenshot 3](screenshots/Screenshot_3.png)
+<p float="left">
+  <img src="screenshots/Screenshot_0.png" width="200" />
+  <img src="screenshots/Screenshot_1.png" width="200" />
+  <img src="screenshots/Screenshot_2.png" width="200" />
+  <img src="screenshots/Screenshot_3.png" width="200" />
+</p>
 
 ## Architecture
 
