@@ -1,0 +1,2 @@
+-keep class com.github.fziraki.daykit.model.** { *; }
+-keep class com.github.fziraki.daykit.result.** { *; }
