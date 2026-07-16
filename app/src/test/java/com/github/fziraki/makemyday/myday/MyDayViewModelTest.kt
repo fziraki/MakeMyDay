@@ -8,6 +8,7 @@ import com.github.fziraki.daykit.model.WeatherInfo
 import com.github.fziraki.daykit.result.DataError
 import com.github.fziraki.daykit.result.Result
 import com.github.fziraki.makemyday.data.FakePreferencesRepository
+import org.mockito.kotlin.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -48,12 +49,12 @@ class MyDayViewModelTest {
     }
 
     private fun createClient(): DayKitClient {
-        return DayKitClient(
-            weather = fakeWeatherProvider,
-            calendar = fakeCalendarProvider,
-            music = fakeMusicProvider,
-            locationSearch = FakeLocationSearchRepository(),
-        )
+        return DayKitClient.Builder(mock())
+            .weather(fakeWeatherProvider)
+            .calendar(fakeCalendarProvider)
+            .music(fakeMusicProvider)
+            .locationSearch(FakeLocationSearchRepository())
+            .build()
     }
 
     private fun createViewModel(): MyDayViewModel {
