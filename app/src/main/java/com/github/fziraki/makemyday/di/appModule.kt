@@ -18,7 +18,7 @@ val appModule = module {
         AppPreferences(get())
     }
 
-    single {
+    single<DayKitClient> {
         DayKitClient.create(androidContext())
     }
 
