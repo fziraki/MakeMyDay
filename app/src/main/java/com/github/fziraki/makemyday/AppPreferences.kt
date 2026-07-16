@@ -8,6 +8,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.github.fziraki.daykit.model.LocationResult
 import com.github.fziraki.makemyday.data.PreferencesRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -45,7 +46,7 @@ class AppPreferences(
     override val onboardingCompleted: Flow<Boolean> =
         dataStore.data.map {
             it[ONBOARDING_COMPLETED]?:false
-        }
+        }.distinctUntilChanged()
 
     override suspend fun completeOnboarding() {
         dataStore.edit {
@@ -81,7 +82,7 @@ class AppPreferences(
                     json.decodeFromString<LocationResult>(it)
                 }.getOrNull()
             }
-        }
+        }.distinctUntilChanged()
 
     override suspend fun saveFavoriteArtist(artist: String) {
         dataStore.edit {
@@ -92,14 +93,14 @@ class AppPreferences(
     override val savedFavoriteArtist: Flow<String?> =
         dataStore.data.map { preferences ->
             preferences[FAVORITE_ARTIST]
-        }
+        }.distinctUntilChanged()
 
     // -------------------------
     // Theme Mode
     // -------------------------
 
     override val themeMode: Flow<String> =
-        dataStore.data.map { it[THEME_MODE] ?: "system" }
+        dataStore.data.map { it[THEME_MODE] ?: "system" }.distinctUntilChanged()
 
     override suspend fun setThemeMode(mode: String) {
         dataStore.edit { it[THEME_MODE] = mode }
