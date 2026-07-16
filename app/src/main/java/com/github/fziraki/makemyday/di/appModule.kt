@@ -19,7 +19,7 @@ val appModule = module {
     }
 
     single {
-        DayKitClient.Builder(androidContext()).build()
+        DayKitClient.create(androidContext())
     }
 
     single<AudioPlayer> {

@@ -15,12 +15,6 @@ internal class AndroidCalendarProvider(
 
     override suspend fun getTodayEvents(): Result<List<com.github.fziraki.daykit.model.CalendarEvent>, DataError.Local> =
         withContext(Dispatchers.IO) {
-            when (val result = dataSource.queryTodayEvents()) {
-                is CalendarQueryResult.Success -> Result.Success(
-                    result.events.map { it.toDomain() }
-                )
-                is CalendarQueryResult.PermissionDenied -> Result.Error(DataError.Local.PERMISSION_DENIED)
-                is CalendarQueryResult.Error -> Result.Error(DataError.Local.UNKNOWN)
-            }
+            dataSource.queryTodayEvents()
         }
 }

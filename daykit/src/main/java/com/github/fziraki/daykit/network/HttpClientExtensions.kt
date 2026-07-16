@@ -60,18 +60,7 @@ suspend inline fun <reified T> responseToResult(response: HttpResponse): Result<
             } catch (e: SerializationException) {
                 Result.Error(DataError.Network.SERIALIZATION)
             }
-
-        400 -> Result.Error(DataError.Network.BAD_REQUEST)
-        401 -> Result.Error(DataError.Network.UNAUTHORIZED)
-        403 -> Result.Error(DataError.Network.FORBIDDEN)
-        404 -> Result.Error(DataError.Network.NOT_FOUND)
-        408 -> Result.Error(DataError.Network.REQUEST_TIMEOUT)
-        409 -> Result.Error(DataError.Network.CONFLICT)
-        413 -> Result.Error(DataError.Network.PAYLOAD_TOO_LARGE)
-        429 -> Result.Error(DataError.Network.TOO_MANY_REQUESTS)
-        in 500..599 -> Result.Error(DataError.Network.SERVER_ERROR)
-        503 -> Result.Error(DataError.Network.SERVICE_UNAVAILABLE)
-        else -> Result.Error(DataError.Network.UNKNOWN)
+        else -> mapHttpStatus(response.status.value)
     }
 
 fun <T> mapHttpStatus(statusCode: Int): Result<T, DataError.Network> =

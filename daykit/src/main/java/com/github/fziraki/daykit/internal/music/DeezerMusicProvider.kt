@@ -41,7 +41,7 @@ internal class DeezerMusicProvider(
                 is Result.Error -> result
                 is Result.Success -> result.data.data.firstOrNull()?.id
                     ?.let { Result.Success(it) }
-                    ?: Result.Error(DataError.Network.INVALID_ARTIST)
+                    ?: Result.Error(DataError.Network.NOT_FOUND)
             }
         }
     }

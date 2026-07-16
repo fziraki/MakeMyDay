@@ -3,19 +3,13 @@ package com.github.fziraki.makemyday.myday
 import com.github.fziraki.daykit.DayKitClient
 import com.github.fziraki.daykit.model.CalendarEvent
 import com.github.fziraki.daykit.model.LocationResult
-import com.github.fziraki.daykit.model.MyDaySummary
 import com.github.fziraki.daykit.model.Track
 import com.github.fziraki.daykit.model.WeatherInfo
-import com.github.fziraki.daykit.providers.CalendarProvider
-import com.github.fziraki.daykit.providers.LocationSearchRepository
-import com.github.fziraki.daykit.providers.MusicProvider
-import com.github.fziraki.daykit.providers.WeatherProvider
 import com.github.fziraki.daykit.result.DataError
 import com.github.fziraki.daykit.result.Result
 import com.github.fziraki.makemyday.data.FakePreferencesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -26,7 +20,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MyDayViewModelTest {
@@ -55,12 +48,12 @@ class MyDayViewModelTest {
     }
 
     private fun createClient(): DayKitClient {
-        return DayKitClient.Builder(mock())
-            .weather(fakeWeatherProvider)
-            .calendar(fakeCalendarProvider)
-            .music(fakeMusicProvider)
-            .locationSearch(FakeLocationSearchRepository())
-            .build()
+        return DayKitClient(
+            weather = fakeWeatherProvider,
+            calendar = fakeCalendarProvider,
+            music = fakeMusicProvider,
+            locationSearch = FakeLocationSearchRepository(),
+        )
     }
 
     private fun createViewModel(): MyDayViewModel {

@@ -1,6 +1,7 @@
-package com.github.fziraki.daykit.internal.weather
+package com.github.fziraki.daykit.internal.location
 
 import android.util.Log
+import com.github.fziraki.daykit.internal.weather.NominatimResult
 import com.github.fziraki.daykit.model.LocationResult
 import com.github.fziraki.daykit.providers.LocationSearchRepository
 import io.ktor.client.HttpClient
