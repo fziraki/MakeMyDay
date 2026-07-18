@@ -35,12 +35,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.github.fziraki.makemyday.R
 import com.github.fziraki.makemyday.myday.SetupMusicRow
 import org.koin.androidx.compose.koinViewModel
 
@@ -48,6 +50,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SetupPage(
     onNavigateToLocationSearch: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: SetupPageViewModel = koinViewModel(),
 ) {
 
@@ -77,17 +80,17 @@ fun SetupPage(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "Set up",
+            text = stringResource(R.string.setup_title),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onBackground
         )
         Text(
-            text = "Everything is optional. Add what you want now, change it anytime.",
+            text = stringResource(R.string.setup_description),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -97,8 +100,8 @@ fun SetupPage(
         // Weather — tappable, navigates to location search
         SetupRow(
             icon = Icons.Outlined.Cloud,
-            title = "Weather",
-            subtitle = state.selectedCity.ifEmpty { "Set your city" },
+            title = stringResource(R.string.setup_weather),
+            subtitle = state.selectedCity.ifEmpty { stringResource(R.string.setup_set_city) },
             isGranted = state.selectedCity.isNotBlank(),
             onClick = onNavigateToLocationSearch
         )
@@ -106,8 +109,8 @@ fun SetupPage(
         // Calendar — tappable, requests permission
         SetupRow(
             icon = Icons.Outlined.CalendarToday,
-            title = "Calendar",
-            subtitle = "Access your today's events",
+            title = stringResource(R.string.setup_calendar),
+            subtitle = stringResource(R.string.setup_calendar_subtitle),
             isGranted = state.isCalendarGranted,
             onClick = {
 

@@ -11,7 +11,7 @@ android {
     defaultConfig {
         applicationId = "com.github.fziraki.makemyday"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -31,6 +31,10 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    lint {
+        enable += "ComposeM2Api"
+        error += "ComposeM2Api"
     }
 }
 
@@ -52,6 +56,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.media3.exoplayer)
+    lintChecks(libs.compose.lint.checks)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
@@ -64,6 +69,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    implementation("com.github.fziraki:daykit:0.1.0")
+    implementation(libs.daykit)
 
 }

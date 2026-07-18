@@ -23,14 +23,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.fziraki.makemyday.R
 
 @Composable
-fun WelcomePage() {
+fun WelcomePage(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Surface(
@@ -59,7 +60,7 @@ fun WelcomePage() {
         Spacer(Modifier.height(32.dp))
 
         Text(
-            text = "Your day, at a glance — weather, calendar\nand music in one place.",
+            text = stringResource(R.string.welcome_tagline),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -74,15 +75,15 @@ fun WelcomePage() {
         Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
             WelcomeFeatureRow(
                 icon = Icons.Outlined.Cloud,
-                label = "Live weather for your city"
+                label = stringResource(R.string.welcome_weather)
             )
             WelcomeFeatureRow(
                 icon = Icons.Outlined.CalendarToday,
-                label = "Today's events from your calendar"
+                label = stringResource(R.string.welcome_calendar)
             )
             WelcomeFeatureRow(
                 icon = Icons.Outlined.MusicNote,
-                label = "Music picked for your taste"
+                label = stringResource(R.string.welcome_music)
             )
         }
     }

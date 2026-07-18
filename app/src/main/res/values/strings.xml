@@ -1,3 +1,55 @@
 <resources>
     <string name="app_name">MakeMyDay</string>
+
+    <!-- LocationSearchScreen -->
+    <string name="location_title">Your location</string>
+    <string name="location_description">Used only for weather. Search for your city.</string>
+    <string name="location_search_hint">Search city...</string>
+
+    <!-- MyDayScreen -->
+    <string name="section_todays_events">Today\'s events</string>
+    <string name="calendar_access_needed">Calendar access needed</string>
+    <string name="calendar_tap_to_grant">Tap to grant permission</string>
+    <string name="calendar_error_retry">Could not load events. Tap to retry.</string>
+    <string name="no_events_today">No events today</string>
+    <string name="get_recommendation">Get Recommendation</string>
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
+    <string name="greeting_night">Good night</string>
+    <string name="weather_unavailable">Weather unavailable</string>
+    <string name="weather_temp_condition">%1$d°C, %2$s</string>
+    <string name="weather_feels_like">%1$s · feels like %2$d°C</string>
+    <string name="change_city">Change city</string>
+    <string name="weather_not_set">Weather not set up</string>
+    <string name="tap_to_set_city">Tap to set your city</string>
+    <string name="event_no_title">No title</string>
+    <string name="listen_to_preview">Listen to the preview:</string>
+    <string name="track_based_on_taste">%s · based on your taste</string>
+    <string name="event_all_day">All day</string>
+
+    <!-- SetupMusicRow -->
+    <string name="music_section_title">Music</string>
+    <string name="music_section_subtitle">An artist you love</string>
+    <string name="music_input_hint">e.g. Arctic Monkeys</string>
+    <string name="action_done">Done</string>
+    <string name="music_hint">We\'ll suggest music in a similar style.</string>
+
+    <!-- OnboardingScreen -->
+    <string name="onboarding_continue">Continue</string>
+    <string name="get_started">Get Started</string>
+
+    <!-- SetupPage -->
+    <string name="setup_title">Set up</string>
+    <string name="setup_description">Everything is optional. Add what you want now, change it anytime.</string>
+    <string name="setup_weather">Weather</string>
+    <string name="setup_set_city">Set your city</string>
+    <string name="setup_calendar">Calendar</string>
+    <string name="setup_calendar_subtitle">Access your today\'s events</string>
+
+    <!-- WelcomePage -->
+    <string name="welcome_tagline">Your day, at a glance — weather, calendar\nand music in one place.</string>
+    <string name="welcome_weather">Live weather for your city</string>
+    <string name="welcome_calendar">Today\'s events from your calendar</string>
+    <string name="welcome_music">Music picked for your taste</string>
 </resources>

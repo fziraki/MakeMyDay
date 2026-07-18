@@ -24,6 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
+import com.github.fziraki.makemyday.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -76,13 +78,13 @@ fun SetupMusicRow(
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Music",
+                    text = stringResource(R.string.music_section_title),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "An artist you love",
+                    text = stringResource(R.string.music_section_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -92,7 +94,7 @@ fun SetupMusicRow(
                     onValueChange = onArtistChange,
                     placeholder = {
                         Text(
-                            "e.g. Arctic Monkeys",
+                            stringResource(R.string.music_input_hint),
                             style = MaterialTheme.typography.bodySmall
                         )
                     },
@@ -117,7 +119,7 @@ fun SetupMusicRow(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
-                                    contentDescription = "Done",
+                                    contentDescription = stringResource(R.string.action_done),
                                     tint = MaterialTheme.colorScheme.secondary,
                                 )
                             }
@@ -126,7 +128,7 @@ fun SetupMusicRow(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "We'll suggest music in a similar style.",
+                    text = stringResource(R.string.music_hint),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

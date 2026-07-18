@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -27,17 +26,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.EditLocationAlt
-import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
@@ -47,7 +42,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -58,19 +52,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.github.fziraki.makemyday.R
 import com.github.fziraki.makemyday.myday.model.CalendarEventUi
 import com.github.fziraki.makemyday.myday.model.TrackUi
 import com.github.fziraki.makemyday.myday.model.WeatherUi
-import com.github.fziraki.makemyday.R
 import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
 import java.time.LocalDate
@@ -84,6 +77,7 @@ fun MyDayScreen(
     onNavigateToLocationSearch: () -> Unit,
     themeMode: String,
     onToggleTheme: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: MyDayViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -108,6 +102,7 @@ fun MyDayScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
@@ -201,7 +196,7 @@ fun MyDayScreen(
             }
 
             item {
-                SectionLabel("Today's events")
+                SectionLabel(stringResource(R.string.section_todays_events))
                 if (state.calendarPermissionDenied) {
                     Card(
                         modifier = Modifier
@@ -252,12 +247,12 @@ fun MyDayScreen(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    "Calendar access needed",
+                                    stringResource(R.string.calendar_access_needed),
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onErrorContainer
                                 )
                                 Text(
-                                    "Tap to grant permission",
+                                    stringResource(R.string.calendar_tap_to_grant),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onErrorContainer
                                 )
@@ -266,14 +261,14 @@ fun MyDayScreen(
                     }
                 } else if (state.calendarError) {
                     Text(
-                        text = "Could not load events. Tap to retry.",
+                        text = stringResource(R.string.calendar_error_retry),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.clickable { viewModel.onAction(MyDayAction.RetryCalendar) }
                     )
                 } else if (state.events.isEmpty()) {
                     Text(
-                        text = "No events today",
+                        text = stringResource(R.string.no_events_today),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -301,7 +296,7 @@ fun MyDayScreen(
                             ),
                             modifier = Modifier.fillMaxWidth().height(52.dp)
                         ) {
-                            Text("Get Recommendation")
+                            Text(stringResource(R.string.get_recommendation))
                         }
                     }
                 )
@@ -343,8 +338,8 @@ fun MyDayScreen(
 }
 
 @Composable
-fun TodayCard() {
-    Column(modifier = Modifier.fillMaxWidth()) {
+fun TodayCard(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = todayLabel(),
             style = MaterialTheme.typography.bodySmall,
@@ -367,32 +362,35 @@ private fun todayLabel(): String {
     return today.format(formatter)
 }
 
+@Composable
 private fun greeting(): String {
     val hour = LocalTime.now().hour
     return when {
-        hour < 12 -> "Good morning"
-        hour < 18 -> "Good afternoon"
-        hour < 21 -> "Good evening"
-        else -> "Good night"
+        hour < 12 -> stringResource(R.string.greeting_morning)
+        hour < 18 -> stringResource(R.string.greeting_afternoon)
+        hour < 21 -> stringResource(R.string.greeting_evening)
+        else -> stringResource(R.string.greeting_night)
     }
 }
 
 @Composable
-fun SectionLabel(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(bottom = 4.dp)
-    )
-    Spacer(modifier = Modifier.height(4.dp))
+fun SectionLabel(text: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+    }
 }
 
 @Composable
-fun WeatherCard(weather: WeatherUi?, onEditLocation: () -> Unit = {}) {
+fun WeatherCard(weather: WeatherUi?, modifier: Modifier = Modifier, onEditLocation: () -> Unit = {}) {
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
         ),
@@ -407,15 +405,15 @@ fun WeatherCard(weather: WeatherUi?, onEditLocation: () -> Unit = {}) {
         ) {
             if (weather == null) {
                 Text(
-                    "Weather unavailable",
+                    stringResource(R.string.weather_unavailable),
                     modifier = Modifier.weight(1f),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("${weather.tempC}°C, ${weather.condition}", fontWeight = FontWeight.Medium)
+                    Text(stringResource(R.string.weather_temp_condition, weather.tempC.toInt(), weather.condition), fontWeight = FontWeight.Medium)
                     Text(
-                        "${weather.city} · feels like ${weather.tempC}°C",
+                        stringResource(R.string.weather_feels_like, weather.city, weather.tempC.toInt()),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -433,7 +431,7 @@ fun WeatherCard(weather: WeatherUi?, onEditLocation: () -> Unit = {}) {
             ) {
                 Icon(
                     imageVector = Icons.Outlined.EditLocationAlt,
-                    contentDescription = "Change city",
+                    contentDescription = stringResource(R.string.change_city),
                     tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(8.dp)
                 )
@@ -443,10 +441,10 @@ fun WeatherCard(weather: WeatherUi?, onEditLocation: () -> Unit = {}) {
 }
 
 @Composable
-fun WeatherNotSetCard(onTap: () -> Unit) {
+fun WeatherNotSetCard(onTap: () -> Unit, modifier: Modifier = Modifier) {
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onTap() },
         colors = CardDefaults.cardColors(
@@ -467,11 +465,11 @@ fun WeatherNotSetCard(onTap: () -> Unit) {
             )
             Column {
                 Text(
-                    text = "Weather not set up",
+                    text = stringResource(R.string.weather_not_set),
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Tap to set your city",
+                    text = stringResource(R.string.tap_to_set_city),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -482,9 +480,12 @@ fun WeatherNotSetCard(onTap: () -> Unit) {
 
 
 @Composable
-fun EventRow(event: CalendarEventUi) {
-    val time = formatEventTime(event)
-    Row(verticalAlignment = Alignment.CenterVertically) {
+fun EventRow(event: CalendarEventUi, modifier: Modifier = Modifier) {
+    val time = formatEventTime(event, stringResource(R.string.event_all_day))
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
         Box(
             modifier = Modifier
                 .width(4.dp)
@@ -496,7 +497,7 @@ fun EventRow(event: CalendarEventUi) {
         )
         Spacer(Modifier.width(10.dp))
         Column {
-            Text(event.title ?: "No title", fontWeight = FontWeight.Medium)
+            Text(event.title ?: stringResource(R.string.event_no_title), fontWeight = FontWeight.Medium)
             Text(
                 time,
                 style = MaterialTheme.typography.bodySmall,
@@ -510,11 +511,13 @@ fun EventRow(event: CalendarEventUi) {
 fun DiscoverCard(
     track: TrackUi,
     isPlaying: Boolean,
-    onPlayPause: (String) -> Unit
+    onPlayPause: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    SectionLabel("Listen to the preview:")
-    Card(
-        modifier = Modifier.fillMaxWidth(),
+    Column(modifier = modifier) {
+        SectionLabel(stringResource(R.string.listen_to_preview))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
         ),
@@ -554,7 +557,7 @@ fun DiscoverCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(track.title, fontWeight = FontWeight.Medium)
                 Text(
-                    "${track.artist} · based on your taste",
+                    stringResource(R.string.track_based_on_taste, track.artist.orEmpty()),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -563,8 +566,10 @@ fun DiscoverCard(
     }
 }
 
-private fun formatEventTime(event: CalendarEventUi): String {
-    if (event.isAllDay) return "All day"
+}
+
+private fun formatEventTime(event: CalendarEventUi, allDayLabel: String): String {
+    if (event.isAllDay) return allDayLabel
     val zone = ZoneId.systemDefault()
     val start = Instant.ofEpochMilli(event.startTime)
         .atZone(zone)
