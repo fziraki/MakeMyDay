@@ -1,4 +1,4 @@
-package com.github.fziraki.daykit.internal.weather
+package com.github.fziraki.daykit.internal.location
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

@@ -60,8 +60,8 @@ class ToMusicUiStateTest {
     }
 
     @Test
-    fun `INVALID_ARTIST maps to Error with edit_artist action`() {
-        val result: Result<Track, DataError.Network>? = Result.Error(DataError.Network.INVALID_ARTIST)
+    fun `NOT_FOUND maps to Error with edit_artist action`() {
+        val result: Result<Track, DataError.Network>? = Result.Error(DataError.Network.NOT_FOUND)
         val state = result.toMusicUiState()
         assertTrue(state is MusicUiState.Error)
         assertEquals(ErrorAction.EDIT_ARTIST, (state as MusicUiState.Error).action)
@@ -72,6 +72,6 @@ class ToMusicUiStateTest {
         assertEquals("No internet connection.", DataError.Network.NO_INTERNET.toUserMessage())
         assertEquals("Request timed out.", DataError.Network.REQUEST_TIMEOUT.toUserMessage())
         assertEquals("Server error.", DataError.Network.SERVER_ERROR.toUserMessage())
-        assertEquals("Artist not found.", DataError.Network.INVALID_ARTIST.toUserMessage())
+        assertEquals("Artist not found.", DataError.Network.NOT_FOUND.toUserMessage())
     }
 }

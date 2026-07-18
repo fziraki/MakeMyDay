@@ -30,7 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.github.fziraki.makemyday.R
 import com.github.fziraki.makemyday.ui.theme.MakeMyDayTheme
 import kotlinx.coroutines.launch
 
@@ -43,7 +45,8 @@ sealed interface OnboardingPage {
 @Composable
 fun OnboardingScreen(
     onFinish: () -> Unit,
-    onNavigateToLocationSearch: () -> Unit
+    onNavigateToLocationSearch: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
 
     val pages = remember {
@@ -62,7 +65,7 @@ fun OnboardingScreen(
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .background(color = MaterialTheme.colorScheme.background)
             .fillMaxSize()
             .padding(
@@ -131,9 +134,9 @@ fun OnboardingScreen(
         ) {
             Text(
                 text = if (pagerState.currentPage == pages.lastIndex)
-                    "Continue"
+                    stringResource(R.string.onboarding_continue)
                 else
-                    "Get Started"
+                    stringResource(R.string.get_started)
             )
         }
 

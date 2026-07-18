@@ -30,15 +30,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.fziraki.makemyday.locationsearch.model.LocationResultUi
+import com.github.fziraki.makemyday.R
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationSearchScreen(
     onLocationSelected: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: LocationSearchViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -50,10 +53,11 @@ fun LocationSearchScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Your location") },
+                title = { Text(stringResource(R.string.location_title)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground
@@ -70,7 +74,7 @@ fun LocationSearchScreen(
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "Used only for weather. Search for your city.",
+                text = stringResource(R.string.location_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -82,7 +86,7 @@ fun LocationSearchScreen(
                 onValueChange = {
                     viewModel.onAction(LocationSearchAction.QueryChanged(it))
                 },
-                placeholder = { Text("Search city...") },
+                placeholder = { Text(stringResource(R.string.location_search_hint)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium
