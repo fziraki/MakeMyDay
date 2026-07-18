@@ -5,6 +5,10 @@ import com.github.fziraki.daykit.model.CalendarEvent
 import com.github.fziraki.daykit.model.LocationResult
 import com.github.fziraki.daykit.model.Track
 import com.github.fziraki.daykit.model.WeatherInfo
+import com.github.fziraki.daykit.providers.CalendarProvider
+import com.github.fziraki.daykit.providers.LocationSearchRepository
+import com.github.fziraki.daykit.providers.MusicProvider
+import com.github.fziraki.daykit.providers.WeatherProvider
 import com.github.fziraki.daykit.result.DataError
 import com.github.fziraki.daykit.result.Result
 import com.github.fziraki.makemyday.data.FakePreferencesRepository
