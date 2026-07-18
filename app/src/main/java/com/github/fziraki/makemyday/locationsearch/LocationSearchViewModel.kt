@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -25,18 +26,16 @@ class LocationSearchViewModel(
     private val _state = MutableStateFlow(LocationSearchState())
     val state = _state.asStateFlow()
 
-    private val queryFlow = MutableStateFlow("")
-
     init {
         viewModelScope.launch {
-            queryFlow
+            _state.map { it.query }
                 .debounce(400.milliseconds)
                 .distinctUntilChanged()
                 .filter { it.length >= 2 }
                 .collect { query ->
                     _state.update { it.copy(isLoading = true) }
                     val results = client.searchCity(query).map { it.toLocationResultUi() }
-                    Log.d("tagg","results $results")
+                    Log.d("LocationSearch", "results $results")
                     _state.update { it.copy(results = results, isLoading = false) }
                 }
         }
@@ -46,7 +45,6 @@ class LocationSearchViewModel(
         when (action) {
             is LocationSearchAction.QueryChanged -> {
                 _state.update { it.copy(query = action.value) }
-                queryFlow.value = action.value
             }
             is LocationSearchAction.LocationSelected -> {
                 viewModelScope.launch {

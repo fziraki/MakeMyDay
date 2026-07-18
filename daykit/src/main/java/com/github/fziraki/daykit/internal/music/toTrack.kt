@@ -5,6 +5,6 @@ import com.github.fziraki.daykit.model.Track
 internal fun DeezerTrackDto.toTrack(): Track = Track(
     title = title,
     artist = artist.name,
-    source = preview, // swap to a `link` field instead if you want the Deezer page, not a playable preview
+    source = preview,
     playedAt = System.currentTimeMillis()
 )

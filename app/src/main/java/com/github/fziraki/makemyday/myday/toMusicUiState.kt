@@ -18,9 +18,8 @@ fun Result<Track, DataError.Network>?.toMusicUiState(): MusicUiState {
                 DataError.Network.SERVER_ERROR,
                 DataError.Network.REQUEST_TIMEOUT -> ErrorAction.RETRY
 
-                DataError.Network.INVALID_ARTIST,
                 DataError.Network.NOT_FOUND -> ErrorAction.EDIT_ARTIST
-                else -> { ErrorAction.RETRY }
+                else -> ErrorAction.RETRY
             }
         )
     }
@@ -31,7 +30,6 @@ fun DataError.Network.toUserMessage(): String =
         DataError.Network.NO_INTERNET -> "No internet connection."
         DataError.Network.REQUEST_TIMEOUT -> "Request timed out."
         DataError.Network.SERVER_ERROR -> "Server error."
-        DataError.Network.INVALID_ARTIST,
         DataError.Network.NOT_FOUND -> "Artist not found."
         else -> {"Something went wrong!"}
     }

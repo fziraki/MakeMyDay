@@ -15,8 +15,6 @@ sealed interface DataError : Error {
         SERVICE_UNAVAILABLE,
         SERIALIZATION,
         UNKNOWN,
-
-        INVALID_ARTIST
     }
 
     enum class Local : DataError {
