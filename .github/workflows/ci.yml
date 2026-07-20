@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: read
-  packages: read
+  packages: write
 
 jobs:
   build:
@@ -43,3 +43,10 @@ jobs:
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/*.apk
+
+      - name: Publish daykit to GitHub Packages
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: ./gradlew :daykit:publishReleasePublicationToGitHubPackagesRepository
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
