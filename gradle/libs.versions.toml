@@ -21,7 +21,7 @@ appcompat = "1.7.1"
 material = "1.14.0"
 koin = "4.2.2"
 media3Exoplayer = "1.10.1"
-daykit = "0.1.0"
+daykit = "0.2.0"
 navigation = "2.9.8"
 ktor = "3.5.1"
 
