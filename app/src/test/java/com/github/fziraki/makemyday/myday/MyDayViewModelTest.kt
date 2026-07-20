@@ -6,11 +6,11 @@ import com.github.fziraki.daykit.model.LocationResult
 import com.github.fziraki.daykit.model.Track
 import com.github.fziraki.daykit.model.WeatherInfo
 import com.github.fziraki.daykit.providers.CalendarProvider
-import com.github.fziraki.daykit.providers.LocationSearchRepository
-import com.github.fziraki.daykit.providers.MusicProvider
-import com.github.fziraki.daykit.providers.WeatherProvider
+import com.github.fziraki.daykit.providers.LocationProvider
 import com.github.fziraki.daykit.result.DataError
 import com.github.fziraki.daykit.result.Result
+import com.github.fziraki.daykit.providers.MusicProvider
+import com.github.fziraki.daykit.providers.WeatherProvider
 import com.github.fziraki.makemyday.data.FakePreferencesRepository
 import org.mockito.kotlin.mock
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +57,7 @@ class MyDayViewModelTest {
             .weather(fakeWeatherProvider)
             .calendar(fakeCalendarProvider)
             .music(fakeMusicProvider)
-            .locationSearch(FakeLocationSearchRepository())
+            .location(FakeLocationProvider())
             .build()
     }
 
@@ -199,6 +199,7 @@ class FakeMusicProvider : MusicProvider {
     }
 }
 
-class FakeLocationSearchRepository : LocationSearchRepository {
-    override suspend fun search(query: String): List<LocationResult> = emptyList()
+class FakeLocationProvider : LocationProvider {
+    override suspend fun search(query: String): Result<List<LocationResult>, DataError.Network> =
+        Result.Success(emptyList())
 }
