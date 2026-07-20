@@ -1,27 +1,28 @@
 package com.github.fziraki.daykit.internal.location
 
-import android.util.Log
-import com.github.fziraki.daykit.internal.weather.NominatimResult
 import com.github.fziraki.daykit.model.LocationResult
-import com.github.fziraki.daykit.providers.LocationSearchRepository
+import com.github.fziraki.daykit.network.safeCall
+import com.github.fziraki.daykit.providers.LocationProvider
+import com.github.fziraki.daykit.result.DataError
+import com.github.fziraki.daykit.result.Result
+import com.github.fziraki.daykit.result.map
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 
-internal class NominatimLocationSearchRepository(private val client: HttpClient) : LocationSearchRepository {
+internal class NominatimLocationProvider(private val client: HttpClient) : LocationProvider {
 
-    override suspend fun search(query: String): List<LocationResult> {
-        return runCatching {
-            val results: List<NominatimResult> = client.get("https://nominatim.openstreetmap.org/search") {
+    override suspend fun search(query: String): Result<List<LocationResult>, DataError.Network> {
+        return safeCall<List<NominatimResult>> {
+            client.get("https://nominatim.openstreetmap.org/search") {
                 parameter("q", query)
                 parameter("format", "json")
                 parameter("addressdetails", 1)
                 parameter("limit", 5)
                 header("User-Agent", "MakeMyDay/1.0")
-            }.body()
-
+            }
+        }.map { results ->
             results.map {
                 LocationResult(
                     city = it.address.city ?: "",
@@ -30,9 +31,6 @@ internal class NominatimLocationSearchRepository(private val client: HttpClient)
                     lon = it.lon.toDouble()
                 )
             }
-
-        }.onFailure {
-            Log.e("Nominatim", "Search failed", it)
-        }.getOrDefault(emptyList())
+        }
     }
 }

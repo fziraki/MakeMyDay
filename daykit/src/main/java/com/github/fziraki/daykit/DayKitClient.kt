@@ -2,8 +2,8 @@ package com.github.fziraki.daykit
 
 import android.content.Context
 import com.github.fziraki.daykit.internal.calendar.AndroidCalendarProvider
+import com.github.fziraki.daykit.internal.location.NominatimLocationProvider
 import com.github.fziraki.daykit.internal.music.DeezerMusicProvider
-import com.github.fziraki.daykit.internal.location.NominatimLocationSearchRepository
 import com.github.fziraki.daykit.internal.weather.OpenMeteoWeatherProvider
 import com.github.fziraki.daykit.model.LocationResult
 import com.github.fziraki.daykit.model.MyDaySummary
@@ -12,7 +12,7 @@ import com.github.fziraki.daykit.model.WeatherInfo
 import com.github.fziraki.daykit.network.HttpClientFactory
 import com.github.fziraki.daykit.network.getEngine
 import com.github.fziraki.daykit.providers.CalendarProvider
-import com.github.fziraki.daykit.providers.LocationSearchRepository
+import com.github.fziraki.daykit.providers.LocationProvider
 import com.github.fziraki.daykit.providers.MusicProvider
 import com.github.fziraki.daykit.providers.WeatherProvider
 import com.github.fziraki.daykit.result.DataError
@@ -24,7 +24,7 @@ class DayKitClient(
     private val weather: WeatherProvider,
     private val calendar: CalendarProvider,
     private val music: MusicProvider,
-    private val locationSearch: LocationSearchRepository,
+    private val location: LocationProvider,
 ) {
 
     suspend fun getMyDay(
@@ -53,8 +53,8 @@ class DayKitClient(
         )
     }
 
-    suspend fun searchCity(query: String): List<LocationResult> =
-        locationSearch.search(query)
+    suspend fun searchCity(query: String): Result<List<LocationResult>, DataError.Network> =
+        location.search(query)
 
     suspend fun getWeather(lat: Double, lon: Double, city: String): Result<WeatherInfo, DataError.Network> =
         weather.getCurrentWeather(lat, lon, city)
@@ -72,7 +72,29 @@ class DayKitClient(
                 calendar = AndroidCalendarProvider(context),
                 weather = OpenMeteoWeatherProvider(httpClient),
                 music = DeezerMusicProvider(httpClient),
-                locationSearch = NominatimLocationSearchRepository(httpClient),
+                location = NominatimLocationProvider(httpClient),
+            )
+        }
+    }
+
+    class Builder(private val context: Context) {
+        private var weather: WeatherProvider? = null
+        private var calendar: CalendarProvider? = null
+        private var music: MusicProvider? = null
+        private var location: LocationProvider? = null
+
+        fun weather(provider: WeatherProvider) = apply { weather = provider }
+        fun calendar(provider: CalendarProvider) = apply { calendar = provider }
+        fun music(provider: MusicProvider) = apply { music = provider }
+        fun location(provider: LocationProvider) = apply { location = provider }
+
+        fun build(): DayKitClient {
+            val httpClient = HttpClientFactory.create(getEngine())
+            return DayKitClient(
+                weather = weather ?: OpenMeteoWeatherProvider(httpClient),
+                calendar = calendar ?: AndroidCalendarProvider(context),
+                music = music ?: DeezerMusicProvider(httpClient),
+                location = location ?: NominatimLocationProvider(httpClient),
             )
         }
     }
