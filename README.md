@@ -58,7 +58,7 @@ A playground for building and publishing an Android SDK.
  │  │ Provider     │    │                  │    │                  │  │
  │  └──────────────┘    └──────────────────┘    └──────────────────┘  │
  │  ┌──────────────────────────────────────────────────────────────┐  │
- │  │              LocationSearchRepository                        │  │
+ │  │              LocationProvider                                │  │
  │  └──────────────────────────────────────────────────────────────┘  │
  └────────────────────────────────────────────────────────────────────┘
                                    │
@@ -95,7 +95,7 @@ A playground for building and publishing an Android SDK.
 
 ## DayKit SDK
 
-Published as `com.github.fziraki:daykit:0.1.0`. Pluggable providers via Builder pattern:
+Published as `com.github.fziraki:daykit:0.2.0`. Pluggable providers via Builder pattern:
 
 ```kotlin
 val client = DayKitClient.Builder(context).build()
@@ -109,7 +109,7 @@ val city  = client.searchCity("London")
 |----------|-----|------|
 | OpenMeteoWeatherProvider | Open-Meteo | Free, no key |
 | DeezerMusicProvider | Deezer | Free, no key |
-| NominatimLocationSearchRepository | OSM Nominatim | Free, no key |
+| NominatimLocationProvider | OSM Nominatim | Free, no key |
 | AndroidCalendarProvider | ContentResolver | `READ_CALENDAR` |
 
 ## License
