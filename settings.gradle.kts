@@ -26,3 +26,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "MakeMyDay"
 include(":app")
+include(":daykit")

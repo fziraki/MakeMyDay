@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.fziraki.daykit.DayKitClient
+import com.github.fziraki.daykit.result.getOrNull
+import com.github.fziraki.daykit.result.onFailure
 import com.github.fziraki.makemyday.data.PreferencesRepository
 import com.github.fziraki.makemyday.locationsearch.model.toLocationResultUi
 import kotlinx.coroutines.FlowPreview
@@ -34,9 +36,10 @@ class LocationSearchViewModel(
                 .filter { it.length >= 2 }
                 .collect { query ->
                     _state.update { it.copy(isLoading = true) }
-                    val results = client.searchCity(query).map { it.toLocationResultUi() }
-                    Log.d("LocationSearch", "results $results")
-                    _state.update { it.copy(results = results, isLoading = false) }
+                    val list = client.searchCity(query)
+                        .onFailure { Log.e("LocationSearch", "Search failed: $it") }
+                        .getOrNull()?.map { it.toLocationResultUi() } ?: emptyList()
+                    _state.update { it.copy(results = list, isLoading = false) }
                 }
         }
     }

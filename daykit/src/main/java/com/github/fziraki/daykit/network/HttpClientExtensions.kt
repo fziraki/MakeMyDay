@@ -5,6 +5,7 @@ import com.github.fziraki.daykit.result.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.RedirectResponseException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.request.get
@@ -35,6 +36,8 @@ suspend inline fun <reified T> safeCall(execute: suspend () -> HttpResponse): Re
         } catch (e: SerializationException) {
             return Result.Error(DataError.Network.SERIALIZATION)
         } catch (e: TimeoutCancellationException) {
+            return Result.Error(DataError.Network.REQUEST_TIMEOUT)
+        } catch (e: HttpRequestTimeoutException) {
             return Result.Error(DataError.Network.REQUEST_TIMEOUT)
         } catch (e: IOException) {
             return Result.Error(DataError.Network.NO_INTERNET)

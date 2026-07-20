@@ -2,7 +2,9 @@ package com.github.fziraki.makemyday.locationsearch
 
 import com.github.fziraki.daykit.DayKitClient
 import com.github.fziraki.daykit.model.LocationResult
-import com.github.fziraki.daykit.providers.LocationSearchRepository
+import com.github.fziraki.daykit.providers.LocationProvider
+import com.github.fziraki.daykit.result.DataError
+import com.github.fziraki.daykit.result.Result
 import com.github.fziraki.makemyday.data.FakePreferencesRepository
 import com.github.fziraki.makemyday.locationsearch.model.LocationResultUi
 import kotlinx.coroutines.Dispatchers
@@ -26,13 +28,13 @@ class LocationSearchViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
 
     private lateinit var fakePreferences: FakePreferencesRepository
-    private lateinit var fakeSearchRepo: FakeLocationSearchRepository2
+    private lateinit var fakeSearchRepo: FakeLocationProvider
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         fakePreferences = FakePreferencesRepository()
-        fakeSearchRepo = FakeLocationSearchRepository2()
+        fakeSearchRepo = FakeLocationProvider()
     }
 
     @After
@@ -43,7 +45,7 @@ class LocationSearchViewModelTest {
     private fun createViewModel(): LocationSearchViewModel {
         return LocationSearchViewModel(
             client = DayKitClient.Builder(mock())
-                .locationSearch(fakeSearchRepo)
+                .location(fakeSearchRepo)
                 .weather(FakeWeatherForSearchProvider())
                 .calendar(FakeCalendarForSearchProvider())
                 .music(FakeMusicForSearchProvider())
@@ -76,14 +78,14 @@ class LocationSearchViewModelTest {
     }
 }
 
-class FakeLocationSearchRepository2 : LocationSearchRepository {
+class FakeLocationProvider : LocationProvider {
     var results = listOf(
         LocationResult("London", "UK", 51.5, -0.13),
         LocationResult("Paris", "France", 48.85, 2.34)
     )
 
-    override suspend fun search(query: String): List<LocationResult> {
-        return results.filter { it.city.contains(query, ignoreCase = true) }
+    override suspend fun search(query: String): Result<List<LocationResult>, DataError.Network> {
+        return Result.Success(results.filter { it.city.contains(query, ignoreCase = true) })
     }
 }
 
