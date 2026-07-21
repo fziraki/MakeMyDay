@@ -97,7 +97,7 @@ For more details, see [SDK vs. Library: What's the Difference — and How to Bui
 
 ## DayKit SDK
 
-Published as `com.github.fziraki:daykit:0.3.0`. Pluggable providers via Builder pattern:
+Published as `com.github.fziraki:daykit:0.4.0`. Pluggable providers via Builder pattern:
 
 ```kotlin
 val client = DayKitClient.Builder(context).build()
