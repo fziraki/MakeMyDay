@@ -8,15 +8,13 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 object HttpClientFactory {
-    fun create(
-        engine: HttpClientEngine,
-    ): HttpClient =
-        HttpClient(engine) {
+    private var instance: HttpClient? = null
 
+    fun create(engine: HttpClientEngine): HttpClient {
+        return instance ?: HttpClient(engine) {
             install(HttpTimeout) {
                 requestTimeoutMillis = 30_000
             }
-
             install(ContentNegotiation) {
                 json(
                     Json {
@@ -26,6 +24,6 @@ object HttpClientFactory {
                     },
                 )
             }
-
-        }
+        }.also { instance = it }
+    }
 }
