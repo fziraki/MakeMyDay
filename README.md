@@ -78,6 +78,7 @@ A playground for building and publishing an Android SDK.
  │  Nav: Navigation Compose - type-safe @Serializable routes         │
  └────────────────────────────────────────────────────────────────────┘
 ```
+> *For a deep dive into the SDK architecture (Facade + Strategy pattern, provider design, error handling), see [SDK vs. Library: What's the Difference — and How to Build One](https://medium.com/@fatemeh.zirakit/sdk-vs-library-whats-the-difference-and-how-to-build-one-438e3ecc313c).*
 
 ## Tech Stack
 
