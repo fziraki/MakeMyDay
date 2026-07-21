@@ -7,7 +7,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-object HttpClientFactory {
+object HttpClientInstance {
     private var instance: HttpClient? = null
 
     fun create(engine: HttpClientEngine): HttpClient {

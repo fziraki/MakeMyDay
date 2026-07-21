@@ -9,7 +9,7 @@ import com.github.fziraki.daykit.model.LocationResult
 import com.github.fziraki.daykit.model.MyDaySummary
 import com.github.fziraki.daykit.model.Track
 import com.github.fziraki.daykit.model.WeatherInfo
-import com.github.fziraki.daykit.network.HttpClientFactory
+import com.github.fziraki.daykit.network.HttpClientInstance
 import com.github.fziraki.daykit.network.getEngine
 import com.github.fziraki.daykit.providers.CalendarProvider
 import com.github.fziraki.daykit.providers.LocationProvider
@@ -67,7 +67,7 @@ class DayKitClient(
 
     companion object {
         fun create(context: Context): DayKitClient {
-            val httpClient = HttpClientFactory.create(getEngine())
+            val httpClient = HttpClientInstance.create(getEngine())
             return DayKitClient(
                 calendar = AndroidCalendarProvider(context),
                 weather = OpenMeteoWeatherProvider(httpClient),
@@ -89,7 +89,7 @@ class DayKitClient(
         fun location(provider: LocationProvider) = apply { location = provider }
 
         fun build(): DayKitClient {
-            val httpClient = HttpClientFactory.create(getEngine())
+            val httpClient = HttpClientInstance.create(getEngine())
             return DayKitClient(
                 weather = weather ?: OpenMeteoWeatherProvider(httpClient),
                 calendar = calendar ?: AndroidCalendarProvider(context),

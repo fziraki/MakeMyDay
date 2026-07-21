@@ -76,8 +76,8 @@ fun <T> mapHttpStatus(statusCode: Int): Result<T, DataError.Network> =
         409 -> Result.Error(DataError.Network.CONFLICT)
         413 -> Result.Error(DataError.Network.PAYLOAD_TOO_LARGE)
         429 -> Result.Error(DataError.Network.TOO_MANY_REQUESTS)
-        in 500..599 -> Result.Error(DataError.Network.SERVER_ERROR)
         503 -> Result.Error(DataError.Network.SERVICE_UNAVAILABLE)
+        in 500..599 -> Result.Error(DataError.Network.SERVER_ERROR)
         else -> Result.Error(DataError.Network.UNKNOWN)
     }
 
